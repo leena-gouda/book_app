@@ -1,0 +1,133 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../../core/routing/routes.dart';
+import '../../../data/models/book_model.dart';
+
+class BookCard extends StatelessWidget {
+  final List<Items> books;
+
+  const BookCard({super.key, required this.books});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 320.h,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        itemCount: books.length,
+        separatorBuilder: (context, index) => SizedBox(width: 16.w),
+        itemBuilder: (context, index) {
+          final book = books[index];
+          final imageUrl = book.volumeInfo?.imageLinks?.thumbnail ??
+              book.volumeInfo?.imageLinks?.smallThumbnail;
+
+          return GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(
+                  context,
+                  Routes.bookDetailsScreen,
+                  arguments: {'books': book, 'bookId': book.id}
+              );
+            },
+            child: SizedBox(
+              width: 160.w,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Book Cover Image Container
+                  Container(
+                    width: 160.w,
+                    height: 200.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.r),
+                      color: Colors.grey[200],
+                    ),
+                    child: imageUrl != null
+                        ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12.r),
+                      child: Image.network(
+                        imageUrl,
+                        width: 160.w,
+                        height: 200.h,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildPlaceholderIcon();
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                        : _buildPlaceholderIcon(),
+                  ),
+                  SizedBox(height: 8.h),
+                  // Book Title
+                  Text(
+                    book.volumeInfo?.title ?? 'Unknown Title',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 4.h),
+
+                  // Author Name
+                  Text(
+                    book.volumeInfo?.authors?.join(', ') ?? 'Unknown Author',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 4.h),
+
+                  // Category (only show if exists)
+                  if (book.volumeInfo?.categories?.isNotEmpty ?? false)
+                    Text(
+                      book.volumeInfo!.categories!.first,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w400,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderIcon() {
+    return Container(
+      alignment: Alignment.center,
+      color: Colors.grey[200],
+      child: Icon(
+        Icons.book,
+        size: 40.sp,
+        color: Colors.grey[400],
+      ),
+    );
+  }
+}
