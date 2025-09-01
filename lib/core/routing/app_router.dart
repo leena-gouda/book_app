@@ -29,7 +29,8 @@ class AppRouter {
       case Routes.bookDetailsScreen:
         final args = arguments as Map<String, dynamic>;
         final books = args['books'] as Items;
-        return _createRoute(BookDetails(book: books,));
+        final progress = args['progress'] as double?;
+        return _createRoute(BookDetails(book: books,progress: progress,));
       case Routes.reviewsScreen:
         final args = arguments as Map<String, dynamic>;
         final bookId = args['bookId'] as String;

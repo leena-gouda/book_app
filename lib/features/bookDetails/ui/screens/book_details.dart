@@ -12,14 +12,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../Reviews/ui/cubit/review_cubit.dart';
+import '../../../myLibrary/data/models/user_book_model.dart';
+import '../../../myLibrary/ui/cubit/my_library_cubit.dart';
+
+final ValueNotifier<double> readingProgress = ValueNotifier(0.0);
 
 class BookDetails extends StatelessWidget {
   final Items book;
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
-  final ValueNotifier<double> readingProgress = ValueNotifier(0.0);
   final ValueNotifier<bool> isCurrentlyReading  = ValueNotifier(false);
 
-  BookDetails({super.key, required this.book,});
+  BookDetails({super.key, required this.book, double? progress,});
+
+  static Widget withProgress(UserBook book) {
+    readingProgress.value = book.progress ?? 0.0;
+    return BookDetails(book: book.bookDetails);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +156,10 @@ class BookDetails extends StatelessWidget {
                               textColor: AppColor.black,
                               iconData: CupertinoIcons.bookmark,
                               iconColor: AppColor.black,
-                              onPressed: () {},
+                              onPressed: () {
+                                context.read<LibraryCubit>().setBookStatus(bookId, 'to_read', book: book);
+
+                              },
                               hasBorder: true,
                               borderRadius: 12.r,
                               margin: EdgeInsets.only(right: 8.w),
@@ -165,6 +176,8 @@ class BookDetails extends StatelessWidget {
                               iconSize: 12.sp,
                               onPressed: () {
                                 isCurrentlyReading .value = !isCurrentlyReading .value;
+                                print("📊 Current progress value: ${readingProgress.value}");
+                                context.read<LibraryCubit>().setBookStatus(bookId, 'reading', progress: readingProgress.value,book: book);
                               },
                               hasBorder: true,
                               borderRadius: 12.r,
@@ -180,7 +193,9 @@ class BookDetails extends StatelessWidget {
                               iconData: CupertinoIcons.checkmark,
                               iconColor: AppColor.black,
                               iconSize: 12.sp,
-                              onPressed: () {},
+                              onPressed: () {
+                                context.read<LibraryCubit>().markAsFinished(bookId, book: book);
+                              },
                               hasBorder: true,
                               borderRadius: 12.r,
                               margin: EdgeInsets.only(left: 8.w),
@@ -204,8 +219,16 @@ class BookDetails extends StatelessWidget {
                                     currentProgress: progress,
                                     onProgressChanged: (newProgress) {
                                       readingProgress.value = newProgress;
+                                      if (newProgress == 0) {
+                                        context.read<LibraryCubit>().moveBookToCategory(bookId, 'to_read');
+                                      } else if (newProgress == 100) {
+                                        context.read<LibraryCubit>().moveBookToCategory(bookId, 'finished');
+                                      } else {
+                                        context.read<LibraryCubit>().moveBookToCategory(bookId, 'reading');
+                                      }
                                     },
                                     book: book,
+                                    bookId : bookId
                                   ),
                                 );
                               }

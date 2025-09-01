@@ -61,6 +61,29 @@ class Items {
     );
   }
 
+  factory Items.fromSupabaseJson(Map<String, dynamic> json) {
+    return Items(
+      id: json['book_id'] ?? 'unknown',
+      volumeInfo: VolumeInfo(
+        title: json['title'] ?? 'Untitled',
+        authors: (json['authors'] as List?)?.map((e) => e.toString()).toList() ?? [],
+        publisher: json['publisher'] ?? 'Unknown Publisher',
+        publishedDate: json['published_date'] ?? 'Unknown Date',
+        description: json['description'] ?? 'No description available.',
+        pageCount: json['page_count'] ?? 0,
+        categories: (json['categories'] as List?)?.map((e) => e.toString()).toList() ?? [],
+        averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
+        ratingsCount: json['ratings_count'] ?? 0,
+        imageLinks: ImageLinks(
+          thumbnail: json['thumbnail_url'] ?? '',
+          smallThumbnail: json['thumbnail_url'] ?? '',
+        ),
+      ),
+
+    );
+  }
+
+
   Map<String, dynamic> toJson() {
     return {
       'kind': kind,
@@ -252,9 +275,10 @@ class ImageLinks {
   ImageLinks({this.smallThumbnail, this.thumbnail});
 
   ImageLinks.fromJson(Map<String, dynamic> json) {
-    smallThumbnail = json['smallThumbnail'];
-    thumbnail = json['thumbnail'];
+    smallThumbnail = json['smallThumbnail'] ?? '';
+    thumbnail = json['thumbnail'] ?? '';
   }
+
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();

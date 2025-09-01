@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../home/data/models/book_model.dart';
+import '../../../../myLibrary/ui/cubit/my_library_cubit.dart';
 
 class ReadingProgressBar extends StatelessWidget {
   final double currentProgress;
   final ValueChanged<double> onProgressChanged;
 
   final Items book;
+  final bookId;
   const ReadingProgressBar({
     super.key,
     required this.currentProgress,
-    required this.onProgressChanged, required this.book,
+    required this.onProgressChanged, required this.book, this.bookId,
   });
 
   @override
   Widget build(BuildContext context) {
+    print("Building ReadingProgressBar for book: ${book.volumeInfo?.title}");
+    assert(book.volumeInfo?.title != null, 'Book details are missing for bookId: ${book.id}');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch, // Make it stretch full width
       children: [
@@ -66,6 +72,18 @@ class ReadingProgressBar extends StatelessWidget {
               min: 0.0,
               max: 1.0,
               onChanged: onProgressChanged,
+              onChangeEnd: (newProgress) {
+                if (newProgress != currentProgress) {
+                  context.read<LibraryCubit>().setBookStatus(
+                    bookId,
+                    'reading',
+                    progress: newProgress,
+                    book: book,
+                  );
+                }
+
+                print("📤 Auto-saving progress: $newProgress");
+              },
             ),
           ),
         ),

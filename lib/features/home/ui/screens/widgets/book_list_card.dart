@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/routing/routes.dart';
-import '../../../data/models/book_model.dart';
+import '../../../../home/data/models/book_model.dart';
 
-class BookCard extends StatelessWidget {
+class BookListCard extends StatelessWidget {
   final List<Items> books;
 
-  const BookCard({super.key, required this.books});
+  const BookListCard({super.key, required this.books});
 
   @override
   Widget build(BuildContext context) {

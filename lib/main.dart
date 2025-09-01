@@ -8,6 +8,9 @@ import 'package:book_app/features/home/data/repos/mockrepo.dart';
 import 'package:book_app/features/home/data/repos/nyt_books_repo.dart';
 import 'package:book_app/features/home/ui/cubit/home_cubit.dart';
 import 'package:book_app/features/home/ui/screens/home_screen.dart';
+import 'package:book_app/features/myLibrary/data/repos/library_repo.dart';
+import 'package:book_app/features/myLibrary/ui/cubit/button_cubit.dart';
+import 'package:book_app/features/myLibrary/ui/cubit/my_library_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -73,6 +76,8 @@ class MyApp extends StatelessWidget {
           BlocProvider<SignupCubit>(create: (context) => SignupCubit()),
           BlocProvider<LoginCubit>(create: (context) => LoginCubit()),
           BlocProvider<ReviewCubit>(create: (context) => ReviewCubit(ReviewRepository())),
+          BlocProvider<LibraryCubit>(create: (context) => LibraryCubit(LibraryRepository())..loadBooks("All")),
+          BlocProvider<ButtonCubit>(create: (context) => ButtonCubit()),
         ],
         child: MaterialApp(
           navigatorKey: navigatorKey,

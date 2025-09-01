@@ -4,7 +4,8 @@ import 'package:book_app/core/widgets/custom_text_form_field.dart';
 import 'package:book_app/features/auth/login/ui/screens/login_screen.dart';
 import 'package:book_app/features/home/ui/cubit/home_cubit.dart';
 import 'package:book_app/features/home/ui/cubit/navigation_cubit.dart';
-import 'package:book_app/features/home/ui/screens/widgets/book_card.dart';
+import 'package:book_app/features/home/ui/screens/widgets/book_list_card.dart';
+import 'package:book_app/features/myLibrary/ui/screens/widgets/book_card.dart';
 import 'package:book_app/features/bookDetails/ui/screens/book_details.dart';
 import 'package:book_app/features/home/ui/screens/widgets/book_search.dart';
 import 'package:book_app/features/home/ui/screens/widgets/custom_home_subtitle.dart';
@@ -117,7 +118,7 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 5.h),
                     CustomHomeSubtitle(text: "Newly released books spanning various genres."),
                     SizedBox(height: 20.h),
-                    BookCard(
+                    BookListCard(
                       books: state.newReleases ?? [],
                     ),
 
@@ -134,7 +135,7 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 5.h),
                     CustomHomeSubtitle(text: "Books everyone is talking about."),
                     SizedBox(height: 20.h),
-                    BookCard(
+                    BookListCard(
                       books: state.trendingBooks ?? [],
                     ),
                     // New & Noteworthy Section
@@ -149,7 +150,7 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 5.h),
                     CustomHomeSubtitle(text: "Editor’s picks and fresh releases worth your time."),
                     SizedBox(height: 20.h),
-                    BookCard(
+                    BookListCard(
                       books: state.noteworthyBooks ?? [],
                     ),
                   ],

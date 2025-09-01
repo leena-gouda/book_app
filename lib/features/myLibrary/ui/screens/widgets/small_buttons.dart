@@ -21,6 +21,7 @@ class SmallButtons extends StatelessWidget {
   final bool hasBorder;
   final Color? circleTextColor;
   final Color selectedColor;
+  final onPressed;
 
   const SmallButtons({
     super.key,
@@ -37,6 +38,8 @@ class SmallButtons extends StatelessWidget {
     this.circleRadius = 12,
     this.circleTextColor = Colors.white,
     this.selectedColor = Colors.blue,
+    this.onPressed,
+    required bool isSelected,
   });
 
   @override
@@ -60,9 +63,7 @@ class SmallButtons extends StatelessWidget {
             shadowColor: Colors.grey[300],
             elevation: 0,
           ),
-          onPressed: () {
-            context.read<ButtonCubit>().selectButton(text);
-          },
+          onPressed: onPressed,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
