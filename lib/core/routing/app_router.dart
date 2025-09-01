@@ -2,6 +2,7 @@
 import 'package:book_app/core/routing/routes.dart';
 import 'package:book_app/features/home/data/models/book_model.dart';
 import 'package:book_app/features/bookDetails/ui/screens/book_details.dart';
+import 'package:book_app/features/myLibrary/ui/screens/my_library.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../features/Reviews/ui/screens/reviews_screen.dart';
@@ -34,8 +35,8 @@ class AppRouter {
         final bookId = args['bookId'] as String;
         final reviews = args['reviews'] as List<Map<String, dynamic>>;
         return _createRoute(AllReviewsPage(bookId: bookId, reviews: reviews));
-      // case Routes.bookMarkScreen:
-      //   return _createRoute(BookmarkScreen());
+      case Routes.myLibraryScreen:
+        return _createRoute(MyLibrary());
 
       default:
         return MaterialPageRoute(

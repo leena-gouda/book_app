@@ -9,6 +9,7 @@ import 'package:book_app/features/bookDetails/ui/screens/book_details.dart';
 import 'package:book_app/features/home/ui/screens/widgets/book_search.dart';
 import 'package:book_app/features/home/ui/screens/widgets/custom_home_subtitle.dart';
 import 'package:book_app/features/home/ui/screens/widgets/custom_home_title.dart';
+import 'package:book_app/features/myLibrary/ui/screens/my_library.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,7 +29,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               _buildHomeContent(), // Home tab
               const Placeholder(), // Search tab - replace with actual screen
-              const Placeholder(), // My Books tab - replace with actual screen
+              MyLibrary(), // My Books tab - replace with actual screen
               const Placeholder(), // Dashboard tab - replace with actual screen
             ],
           ),

@@ -6,6 +6,8 @@ class Routes {
   static const String homeScreen = '/home-screen';
   static const String bookDetailsScreen = '/book-details-screen';
   static const String reviewsScreen = '/reviews-screen';
+  static const String myLibraryScreen = '/my-library-screen';
+
 
 
 
