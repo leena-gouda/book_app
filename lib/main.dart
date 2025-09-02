@@ -3,6 +3,8 @@ import 'package:book_app/features/Reviews/data/repo/review_repo.dart';
 import 'package:book_app/features/Reviews/ui/cubit/review_cubit.dart';
 import 'package:book_app/features/auth/login/ui/cubit/login_cubit.dart';
 import 'package:book_app/features/auth/signup/ui/cubit/signup_cubit.dart';
+import 'package:book_app/features/bookLists/data/repos/list_repo.dart';
+import 'package:book_app/features/bookLists/ui/cubit/list_cubit.dart';
 import 'package:book_app/features/home/data/repos/book_api_repo.dart';
 import 'package:book_app/features/home/data/repos/mockrepo.dart';
 import 'package:book_app/features/home/data/repos/nyt_books_repo.dart';
@@ -78,6 +80,8 @@ class MyApp extends StatelessWidget {
           BlocProvider<ReviewCubit>(create: (context) => ReviewCubit(ReviewRepository())),
           BlocProvider<LibraryCubit>(create: (context) => LibraryCubit(LibraryRepository())..loadBooks("All")),
           BlocProvider<ButtonCubit>(create: (context) => ButtonCubit()),
+          BlocProvider<ListCubit>(create: (context) => ListCubit(ListRepository())..loadLists()),
+
         ],
         child: MaterialApp(
           navigatorKey: navigatorKey,

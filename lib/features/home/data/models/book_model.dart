@@ -63,7 +63,7 @@ class Items {
 
   factory Items.fromSupabaseJson(Map<String, dynamic> json) {
     return Items(
-      id: json['book_id'] ?? 'unknown',
+      id: json['id'] ?? 'unknown',
       volumeInfo: VolumeInfo(
         title: json['title'] ?? 'Untitled',
         authors: (json['authors'] as List?)?.map((e) => e.toString()).toList() ?? [],
@@ -79,10 +79,8 @@ class Items {
           smallThumbnail: json['thumbnail_url'] ?? '',
         ),
       ),
-
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {

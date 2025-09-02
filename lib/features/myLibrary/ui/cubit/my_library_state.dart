@@ -8,8 +8,9 @@ class LibraryLoading extends LibraryState {}
 
 class LibraryLoaded extends LibraryState {
   final List<UserBook> books;
+  final List<Book> completeLibrary;
 
-  LibraryLoaded({required this.books});
+  LibraryLoaded( {required this.books,this.completeLibrary = const []});
 
   LibraryLoaded copyWith({List<UserBook>? books}) {
     return LibraryLoaded(

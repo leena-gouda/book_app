@@ -9,28 +9,41 @@ part 'my_library_state.dart';
 
 class LibraryCubit extends Cubit<LibraryState> {
   final LibraryRepository repository;
+  List<UserBook> _allBooks = [];
 
   LibraryCubit(this.repository) : super(LibraryInitial());
 
   Future<void> loadBooks(String status) async {
     emit(LibraryLoading());
     try {
-      final normalized = normalizeStatus(status);
-      final books = normalized == 'All'
-          ? await repository.fetchAllBooks()
-          : await repository.fetchBooksByStatus(normalized);
-      print("🔍 Requested status: '$status'");
-      print("🔍 Normalized status: '$normalized'");
+      if (_allBooks.isEmpty) {
+        _allBooks = await repository.fetchAllBooks();
+      }
+      List<UserBook> filteredBooks = _allBooks;
 
-      for (var book in books) {
-        print("📖 ${book.bookId} - ${book.status}");
+      if (status == 'Lists') {
+        emit(LibraryLoaded(books: [])); // Empty books list for Lists tab
+        return;
       }
 
-      emit(LibraryLoaded(books: books));
+      if (status != 'All') {
+        final normalized = normalizeStatus(status);
+        filteredBooks = _allBooks.where((book) => book.status == normalized).toList();
+      }
+      print("🔍 Requested status: '$status'");
+      print("📚 Showing ${filteredBooks.length} books");
+      for (var book in filteredBooks) {
+        print("📖 ${book.bookId} - ${book.status} - Progress: ${book.progress}%");
+      }
+
+      emit(LibraryLoaded(books: filteredBooks));
     } catch (e) {
       emit(LibraryError(e.toString()));
     }
   }
+
+  List<UserBook> getAllBooks() => _allBooks;
+
 
   String normalizeStatus(String status) {
     switch (status.trim().toLowerCase()) {
@@ -43,6 +56,8 @@ class LibraryCubit extends Cubit<LibraryState> {
         return 'finished';
       case 'all':
         return 'All';
+      case 'lists':
+        return 'Lists';
       default:
         return status.trim().toLowerCase();
     }
@@ -63,33 +78,9 @@ class LibraryCubit extends Cubit<LibraryState> {
 
       print("📤 Sending progress: $progress for book: $bookId");
 
-      await loadBooks(status); // Refresh view
-    } catch (e) {
-      emit(LibraryError(e.toString()));
-    }
-  }
+      _allBooks = await repository.fetchAllBooks(); // Refresh complete library
+      await loadBooks(status);
 
-  Future<void> updateBookProgress(String bookId, double progress) async {
-    try {
-      await repository.updateProgress(
-        userId: Supabase.instance.client.auth.currentUser!.id,
-        bookId: bookId,
-        progress: progress,
-      );
-      if (state is LibraryLoaded) {
-        final updatedBooks = (state as LibraryLoaded).books.map((book) {
-          if (book.bookDetails.id == bookId) {
-            return book.copyWith(progress: progress,category: "none");
-          }
-          return book;
-        }).toList();
-
-        emit(LibraryLoaded(books: updatedBooks));
-      }
-
-
-
-      // Optionally reload books or emit a progress update state
     } catch (e) {
       emit(LibraryError(e.toString()));
     }
@@ -109,35 +100,69 @@ class LibraryCubit extends Cubit<LibraryState> {
         book: book,
       );
 
-      // Optionally reload the current filter view
-      await loadBooks('Finished');
+      // Refresh the local cache and reload
+      _allBooks = await repository.fetchAllBooks(); // Refresh complete library
+      await loadBooks('Finished'); // Switch to Finished tab
     } catch (e) {
       emit(LibraryError("Failed to mark as finished: ${e.toString()}"));
     }
   }
-  Future<void> moveBookToCategory(String bookId, String category) async {
-    if (state is LibraryLoaded) {
-      final currentState = state as LibraryLoaded;
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) throw Exception("User not authenticated");
 
-      final updatedBook = await repository.updateBookCategory(
-        userId: userId,
+  Future<void> updateBookProgress(String bookId, double newProgress) async {
+    try {
+      // Determine the appropriate status based on progress
+      String newStatus;
+      if (newProgress == 0) {
+        newStatus = 'to_read';
+      } else if (newProgress == 100) {
+        newStatus = 'finished';
+      } else {
+        newStatus = 'reading';
+      }
+
+      // Update both progress and status in the repository
+      await repository.updateProgressAndStatus(
+        userId: Supabase.instance.client.auth.currentUser!.id,
         bookId: bookId,
-        category: category,
+        progress: newProgress,
+        status: newStatus,
       );
 
-      if (updatedBook != null) {
-        final updatedBooks = currentState.books.map((book) {
-          return book.bookId == bookId ? updatedBook : book;
+      final index = _allBooks.indexWhere((book) => book.bookId == bookId);
+      if (index != -1) {
+        _allBooks[index] = _allBooks[index].copyWith(
+          progress: newProgress,
+          status: newStatus,
+        );
+      }
+
+      // Update local state
+      if (state is LibraryLoaded) {
+        final updatedBooks = (state as LibraryLoaded).books.map((book) {
+          if (book.bookId == bookId) {
+            return book.copyWith(progress: newProgress, status: newStatus);
+          }
+          return book;
         }).toList();
 
-        emit(currentState.copyWith(books: updatedBooks));
+        emit(LibraryLoaded(books: updatedBooks));
       }
+    } catch (e) {
+      emit(LibraryError(e.toString()));
     }
   }
 
+  Future<void> refreshAllBooks() async {
+    _allBooks = await repository.fetchAllBooks();
 
+    // Reload current view if we're in a loaded state
+    if (state is LibraryLoaded) {
+      final currentState = state as LibraryLoaded;
+      // You might want to preserve the current filter logic here
+      // For simplicity, we'll just reload with the current books
+      emit(LibraryLoaded(books: currentState.books));
+    }
+  }
 
 }
 

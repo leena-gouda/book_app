@@ -10,8 +10,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../Reviews/ui/cubit/review_cubit.dart';
+import '../../../bookLists/data/repos/list_repo.dart';
+import '../../../bookLists/ui/cubit/list_cubit.dart';
+import '../../../bookLists/ui/screens/widgets/add_to_list.dart';
 import '../../../myLibrary/data/models/user_book_model.dart';
 import '../../../myLibrary/ui/cubit/my_library_cubit.dart';
 
@@ -206,41 +210,28 @@ class BookDetails extends StatelessWidget {
 
                       SizedBox(height: 12.h),
 
-                      ValueListenableBuilder<bool>(
-                        valueListenable: isCurrentlyReading,
-                        builder: (context, showProgressBar, child) {
-                          if (!showProgressBar) return SizedBox.shrink();
-                          return ValueListenableBuilder<double>(
-                              valueListenable: readingProgress,
-                              builder:(context,progress,child){
-                                return Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                                  child: ReadingProgressBar(
-                                    currentProgress: progress,
-                                    onProgressChanged: (newProgress) {
-                                      readingProgress.value = newProgress;
-                                      if (newProgress == 0) {
-                                        context.read<LibraryCubit>().moveBookToCategory(bookId, 'to_read');
-                                      } else if (newProgress == 100) {
-                                        context.read<LibraryCubit>().moveBookToCategory(bookId, 'finished');
-                                      } else {
-                                        context.read<LibraryCubit>().moveBookToCategory(bookId, 'reading');
-                                      }
-                                    },
-                                    book: book,
-                                    bookId : bookId
-                                  ),
-                                );
-                              }
-                          );
-                        },
+                      ValueListenableBuilder<double>(
+                          valueListenable: readingProgress,
+                          builder:(context,progress,child){
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              child: ReadingProgressBar(
+                                  currentProgress: progress,
+                                  onProgressChanged: (newProgress) {
+                                    readingProgress.value = newProgress;
+                                  },
+                                  book: book,
+                                  bookId: bookId
+                              ),
+                            );
+                          }
                       ),
                       SizedBox(height: 12.h,),
                       // Add to List button
                       CustButton(
                         text: "Add to List",
                         iconData: CupertinoIcons.plus,
-                        onPressed: () {},
+                        onPressed: () => _showAddToListBottomSheet(context, book),
                         hasBorder: true,
                         borderRadius: 12.r,
                         width: 390.w,
@@ -509,6 +500,16 @@ class BookDetails extends StatelessWidget {
             ],
           ),
         );
+      },
+    );
+  }
+
+  void _showAddToListBottomSheet(BuildContext context, Items book) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return  AddToListBottomSheet(book: book);
       },
     );
   }

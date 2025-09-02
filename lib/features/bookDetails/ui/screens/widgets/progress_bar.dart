@@ -8,13 +8,15 @@ import '../../../../myLibrary/ui/cubit/my_library_cubit.dart';
 class ReadingProgressBar extends StatelessWidget {
   final double currentProgress;
   final ValueChanged<double> onProgressChanged;
-
   final Items book;
-  final bookId;
+  final String bookId;
+
   const ReadingProgressBar({
     super.key,
     required this.currentProgress,
-    required this.onProgressChanged, required this.book, this.bookId,
+    required this.onProgressChanged,
+    required this.book,
+    required this.bookId,
   });
 
   @override
@@ -23,11 +25,11 @@ class ReadingProgressBar extends StatelessWidget {
     assert(book.volumeInfo?.title != null, 'Book details are missing for bookId: ${book.id}');
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch, // Make it stretch full width
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Header row with title and percentage
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between title and %
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               "Reading Progress",
@@ -51,16 +53,16 @@ class ReadingProgressBar extends StatelessWidget {
 
         // Thicker and full-width slider
         Container(
-          height: 24.h, // Make the track area thicker
+          height: 24.h,
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              trackHeight: 8.h, // Thicker track
+              trackHeight: 8.h,
               thumbShape: RoundSliderThumbShape(
-                enabledThumbRadius: 12.w, // Larger thumb
+                enabledThumbRadius: 12.w,
                 disabledThumbRadius: 12.w,
               ),
               overlayShape: RoundSliderOverlayShape(
-                overlayRadius: 6.w, // Larger overlay
+                overlayRadius: 6.w,
               ),
               activeTrackColor: Colors.blue,
               inactiveTrackColor: Colors.grey[300],
@@ -74,12 +76,27 @@ class ReadingProgressBar extends StatelessWidget {
               onChanged: onProgressChanged,
               onChangeEnd: (newProgress) {
                 if (newProgress != currentProgress) {
-                  context.read<LibraryCubit>().setBookStatus(
-                    bookId,
-                    'reading',
-                    progress: newProgress,
-                    book: book,
-                  );
+                  // Use a delayed future to ensure context is still valid
+                  Future.microtask(() {
+                    if (context.mounted) {
+                      // Determine status based on progress
+                      String status;
+                      if (newProgress == 0.0) {
+                        status = 'to_read';
+                      } else if (newProgress == 1.0) {
+                        status = 'finished';
+                      } else {
+                        status = 'reading';
+                      }
+
+                      context.read<LibraryCubit>().setBookStatus(
+                        bookId,
+                        status,
+                        progress: newProgress,
+                        book: book,
+                      );
+                    }
+                  });
                 }
 
                 print("📤 Auto-saving progress: $newProgress");

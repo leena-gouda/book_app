@@ -12,7 +12,6 @@ class UserBook {
   final DateTime createdAt;
   final Items bookDetails;
   final double? progress;
-  final String? category;
 
   UserBook({
     required this.id,
@@ -26,7 +25,6 @@ class UserBook {
     required this.createdAt,
     required this.bookDetails,
     this.progress,
-    this.category = 'none',
   });
 
 
@@ -78,8 +76,7 @@ class UserBook {
     );
   }
 
-  UserBook copyWith({double? progress, String? category,}) {
-    print("Updating category to $category");
+  UserBook copyWith({double? progress, required String status,}) {
     return UserBook(
       id: id,
       bookId: bookId,
@@ -92,7 +89,22 @@ class UserBook {
       createdAt: createdAt,
       bookDetails: bookDetails,
       progress: progress ?? this.progress,
-      category: category ?? this.category,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'book_id': bookId,
+      'status': status,
+      'current_page': currentPage,
+      'rating': rating,
+      'notes': notes,
+      'started_date': startedDate?.toIso8601String(),
+      'finished_date': finishedDate?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'books': bookDetails.toJson(),
+      'progress': progress,
+    };
   }
 }

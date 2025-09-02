@@ -159,9 +159,25 @@ class LibraryRepository {
   }
 
 
-  Future<void> addBookToList(String bookId, String listId) async {
+  Future<void> addBookToList(String bookId, int listId) async {
     await _client.from('list_books').insert({
       'list_id': listId,
+      'book_id': bookId,
+    });
+  }
+
+  Future<void> updateProgressAndStatus({
+    required String userId,
+    required String bookId,
+    required double progress,
+    required String status,
+  }) async {
+    await _client.from('user_books').update({
+      'progress': progress,
+      'status': status,
+      'updated_date': DateTime.now().toIso8601String(),
+    }).match({
+      'user_id': userId,
       'book_id': bookId,
     });
   }
