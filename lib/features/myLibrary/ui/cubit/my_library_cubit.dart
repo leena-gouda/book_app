@@ -22,7 +22,7 @@ class LibraryCubit extends Cubit<LibraryState> {
       List<UserBook> filteredBooks = _allBooks;
 
       if (status == 'Lists') {
-        emit(LibraryLoaded(books: [])); // Empty books list for Lists tab
+        emit(LibraryLoaded(books: [], currentFilter: status)); // Empty books list for Lists tab
         return;
       }
 
@@ -36,7 +36,7 @@ class LibraryCubit extends Cubit<LibraryState> {
         print("📖 ${book.bookId} - ${book.status} - Progress: ${book.progress}%");
       }
 
-      emit(LibraryLoaded(books: filteredBooks));
+      emit(LibraryLoaded(books: filteredBooks, currentFilter: status));
     } catch (e) {
       emit(LibraryError(e.toString()));
     }
@@ -64,7 +64,7 @@ class LibraryCubit extends Cubit<LibraryState> {
   }
 
 
-  Future<void> setBookStatus(String bookId, String status, {double progress = 0, required Items book}) async {
+  Future<void> setBookStatus(String bookId, String status, {double? progress , required Items book}) async {
     emit(LibraryLoading());
     try {
       await repository.saveBookStatus(
@@ -74,15 +74,29 @@ class LibraryCubit extends Cubit<LibraryState> {
         progress: progress, 
         book: book,
       );
+
+      print("✅ Status updated successfully for book: $bookId");
+
       print("📤 Supabase query with status: '$status'");
 
       print("📤 Sending progress: $progress for book: $bookId");
 
       _allBooks = await repository.fetchAllBooks(); // Refresh complete library
-      await loadBooks(status);
-
+      if (state is LibraryLoaded) {
+        final currentState = state as LibraryLoaded;
+        // You might want to preserve the current filter here
+        await loadBooks(currentState.currentFilter);
+      } else {
+        await loadBooks('All');
+      }
     } catch (e) {
-      emit(LibraryError(e.toString()));
+      print("❌ Error setting book status: $e");
+      emit(LibraryError("Failed to set book status: ${e.toString()}"));
+
+      // Optionally, you could revert to previous state
+      if (state is LibraryLoaded) {
+        emit(state); // Go back to previous loaded state
+      }
     }
   }
 
@@ -114,7 +128,7 @@ class LibraryCubit extends Cubit<LibraryState> {
       String newStatus;
       if (newProgress == 0) {
         newStatus = 'to_read';
-      } else if (newProgress == 100) {
+      } else if (newProgress == 1.0) {
         newStatus = 'finished';
       } else {
         newStatus = 'reading';
@@ -145,11 +159,22 @@ class LibraryCubit extends Cubit<LibraryState> {
           return book;
         }).toList();
 
-        emit(LibraryLoaded(books: updatedBooks));
+        emit(LibraryLoaded(books: updatedBooks, currentFilter: (state as LibraryLoaded).currentFilter));
       }
     } catch (e) {
       emit(LibraryError(e.toString()));
     }
+  }
+
+  // In LibraryCubit class
+  UserBook? getUserBook(String bookId) {
+    if (state is LibraryLoaded) {
+      final books = (state as LibraryLoaded).books;
+      return books.firstWhere(
+            (book) => book.bookId == bookId,
+      );
+    }
+    return null;
   }
 
   Future<void> refreshAllBooks() async {
@@ -160,7 +185,7 @@ class LibraryCubit extends Cubit<LibraryState> {
       final currentState = state as LibraryLoaded;
       // You might want to preserve the current filter logic here
       // For simplicity, we'll just reload with the current books
-      emit(LibraryLoaded(books: currentState.books));
+      emit(LibraryLoaded(books: currentState.books, currentFilter: currentState.currentFilter));
     }
   }
 

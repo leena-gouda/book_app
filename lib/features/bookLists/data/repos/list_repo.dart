@@ -87,7 +87,7 @@ class ListRepository {
       final bookResponse = await _client
           .from('books')
           .select()
-          .eq('id', bookId)
+          .eq('book_id', bookId)
           .maybeSingle();
 
       if (bookResponse == null) {
@@ -95,7 +95,7 @@ class ListRepository {
         await _client
             .from('books')
             .insert({
-          'id': bookId,
+          'book_id': bookId,
           'title': book.volumeInfo?.title,
           'authors': book.volumeInfo?.authors,
           'description': book.volumeInfo?.description,
@@ -147,19 +147,24 @@ class ListRepository {
     }
   }
 
-  // Remove a book from a list - FIXED
+// Remove a book from a list - FIXED
   Future<void> removeBookFromList(int listId, String bookId) async {
     try {
       final user = _client.auth.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
-      // First get the user_book_id
+      // First get the user_book_id using maybeSingle instead of single
       final userBookResponse = await _client
           .from('user_books')
           .select('id')
           .eq('book_id', bookId)
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Changed from single() to maybeSingle()
+
+      if (userBookResponse == null) {
+        print('⚠️ User book entry not found for book: $bookId');
+        return; // Exit early if no user_book entry exists
+      }
 
       final userBookId = userBookResponse['id'] as int;
 
@@ -168,6 +173,8 @@ class ListRepository {
           .delete()
           .eq('list_id', listId)
           .eq('user_book_id', userBookId);
+
+      print('✅ Successfully removed book $bookId from list $listId');
     } catch (e) {
       print('Error removing book from list: $e');
       rethrow;

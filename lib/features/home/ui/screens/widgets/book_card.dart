@@ -4,19 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../core/routing/routes.dart';
 import '../../../../home/data/models/book_model.dart';
-import '../../../data/models/user_book_model.dart';
 
-class BookCard extends StatelessWidget {
-  final UserBook userBook;
-  final String? status;
+class BookkCard extends StatelessWidget {
+  final Items book;
 
 
-  const BookCard({super.key, required this.userBook, this.status});
+  const BookkCard({super.key, required this.book,});
 
   @override
   Widget build(BuildContext context) {
-    final Items book = userBook.bookDetails;
-    final String status = userBook.status;
     final imageUrl = book.volumeInfo?.imageLinks?.thumbnail ?? book.volumeInfo?.imageLinks?.smallThumbnail;
     return SizedBox(
       height: 320.h,
@@ -41,56 +37,31 @@ class BookCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.r),
                     color: Colors.grey[200],
                   ),
-                  child: Stack(
-                    children: [
-                      imageUrl != null
-                        ? ClipRRect(
-                           borderRadius: BorderRadius.circular(12.r),
-                           child: Image.network(
-                              imageUrl,
-                              width: 160.w,
-                              height: 200.h,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return _buildPlaceholderIcon();
-                              },
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                        : null,
-                                  ),
-                                );
-                              },
-                           ),
-                        )
-                      : _buildPlaceholderIcon(),
-                      Positioned(
-                        top: 8.h,
-                        right: 8.w,
-                        child: Container(
-                          width: 60.w,
-                          height: 20.h,
-                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(status),
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          child: Text(
-                            _formatStatus(status),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      )
-                    ],
-                  ),
+                  child: imageUrl != null
+                    ? ClipRRect(
+                       borderRadius: BorderRadius.circular(12.r),
+                       child: Image.network(
+                          imageUrl,
+                          width: 160.w,
+                          height: 200.h,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildPlaceholderIcon();
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          },
+                       ),
+                    )
+                  : _buildPlaceholderIcon(),
                 ),
                 SizedBox(height: 8.h),
                 Column(

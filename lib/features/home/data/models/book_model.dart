@@ -63,7 +63,7 @@ class Items {
 
   factory Items.fromSupabaseJson(Map<String, dynamic> json) {
     return Items(
-      id: json['id'] ?? 'unknown',
+      id: json['book_id'] ?? 'unknown',
       volumeInfo: VolumeInfo(
         title: json['title'] ?? 'Untitled',
         authors: (json['authors'] as List?)?.map((e) => e.toString()).toList() ?? [],

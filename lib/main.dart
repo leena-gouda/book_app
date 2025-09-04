@@ -39,6 +39,9 @@ Future<void> main() async {
 
     await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
+    final libraryRepo = LibraryRepository();
+    await libraryRepo.fixMissingUserBooks();
+
     Bloc.observer = AppBlocObserver();
 
     await isLoggedIn();

@@ -247,9 +247,7 @@ class MyLibrary extends StatelessWidget {
                       ReadingProgressBar(
                         currentProgress: book.progress ?? 0.0,
                         onProgressChanged: (newProgress) {
-                          // This should ONLY update the UI temporarily
-                          // The actual database update happens in onChangeEnd
-                          // inside the ReadingProgressBar widget
+                          context.read<LibraryCubit>().updateBookProgress(book.bookId, newProgress);
                         },
                         book: book.bookDetails,
                         bookId: book.bookId,

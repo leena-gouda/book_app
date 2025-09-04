@@ -19,18 +19,20 @@ import '../../../bookLists/ui/screens/widgets/add_to_list.dart';
 import '../../../myLibrary/data/models/user_book_model.dart';
 import '../../../myLibrary/ui/cubit/my_library_cubit.dart';
 
-final ValueNotifier<double> readingProgress = ValueNotifier(0.0);
-
 class BookDetails extends StatelessWidget {
   final Items book;
+  final UserBook? userBook;
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
-  final ValueNotifier<bool> isCurrentlyReading  = ValueNotifier(false);
+  //final ValueNotifier<bool> isCurrentlyReading  = ValueNotifier(false);
+  final ValueNotifier<String> currentStatus; // Change to track status
+  //final ValueNotifier<double> readingProgress; // Make this instance-specific
 
-  BookDetails({super.key, required this.book, double? progress,});
+
+  BookDetails({super.key, required this.book, double? progress, this.userBook})
+      : currentStatus = ValueNotifier(userBook?.status ?? 'none');
 
   static Widget withProgress(UserBook book) {
-    readingProgress.value = book.progress ?? 0.0;
-    return BookDetails(book: book.bookDetails);
+    return BookDetails(book: book.bookDetails,userBook: book,);
   }
 
   @override
@@ -41,6 +43,12 @@ class BookDetails extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       reviewCubit.loadReviews(bookId);
     });
+    // currentStatus.addListener(() {
+    //   if (currentStatus.value == 'reading' && readingProgress.value == 0.0) {
+    //     // Set a default progress if switching to reading with 0 progress
+    //     readingProgress.value = 0.1;
+    //   }
+    // });
     return Scaffold(
         appBar: AppBar(
           actions: [
@@ -161,6 +169,8 @@ class BookDetails extends StatelessWidget {
                               iconData: CupertinoIcons.bookmark,
                               iconColor: AppColor.black,
                               onPressed: () {
+                                currentStatus.value = 'to_read'; // Update the status
+
                                 context.read<LibraryCubit>().setBookStatus(bookId, 'to_read', book: book);
 
                               },
@@ -178,10 +188,18 @@ class BookDetails extends StatelessWidget {
                               iconData: CupertinoIcons.book,
                               iconColor: AppColor.black,
                               iconSize: 12.sp,
-                              onPressed: () {
-                                isCurrentlyReading .value = !isCurrentlyReading .value;
-                                print("📊 Current progress value: ${readingProgress.value}");
-                                context.read<LibraryCubit>().setBookStatus(bookId, 'reading', progress: readingProgress.value,book: book);
+                              onPressed: () async {
+                                currentStatus.value = 'reading'; // Update the status
+                                // print("📊 Current progress value: ${readingProgress.value}");
+                                // if (readingProgress.value == 0.0) {
+                                //   readingProgress.value = 0.1;
+                                // }
+                                final libraryRepo = context.read<LibraryCubit>().repository;
+                                final userId = Supabase.instance.client.auth.currentUser!.id;
+                                final exists = await libraryRepo.doesUserBookExist(userId, bookId);
+                                print("📋 Book exists in user_books: $exists");
+
+                                context.read<LibraryCubit>().setBookStatus(bookId, 'reading', book: book);
                               },
                               hasBorder: true,
                               borderRadius: 12.r,
@@ -198,6 +216,8 @@ class BookDetails extends StatelessWidget {
                               iconColor: AppColor.black,
                               iconSize: 12.sp,
                               onPressed: () {
+                                currentStatus.value = 'finished'; // Update the status
+
                                 context.read<LibraryCubit>().markAsFinished(bookId, book: book);
                               },
                               hasBorder: true,
@@ -210,22 +230,60 @@ class BookDetails extends StatelessWidget {
 
                       SizedBox(height: 12.h),
 
-                      ValueListenableBuilder<double>(
-                          valueListenable: readingProgress,
-                          builder:(context,progress,child){
-                            return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12.h),
-                              child: ReadingProgressBar(
-                                  currentProgress: progress,
+                      // ValueListenableBuilder<String>(
+                      //     valueListenable: currentStatus,
+                      //     builder: (context, status, child) {
+                      //       // Only show progress bar if status is 'reading'
+                      //       if (status == 'reading') {
+                      //         return Padding(
+                      //           padding: EdgeInsets.symmetric(vertical: 12.h),
+                      //           child: ReadingProgressBar(
+                      //               currentProgress: readingProgress.value ,
+                      //               onProgressChanged: (newProgress) {
+                      //                 readingProgress.value = newProgress;
+                      //                 context.read<LibraryCubit>().updateBookProgress(bookId, readingProgress.value);
+                      //               },
+                      //               book: book,
+                      //               bookId: bookId
+                      //           ),
+                      //         );
+                      //       } else {
+                      //         return SizedBox.shrink(); // Hide progress bar
+                      //       }
+                      //     }
+                      // ),
+
+                      ValueListenableBuilder<String>(
+                          valueListenable: currentStatus,
+                          builder: (context, status, child) {
+                            if (status == 'reading') {
+                              // Get the current progress from the library cubit
+                              final libraryCubit = context.read<LibraryCubit>();
+                              final userBook = libraryCubit.getUserBook(bookId);
+                              final currentProgress = userBook?.progress ?? 0.1;
+
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                child: ReadingProgressBar(
+                                  currentProgress: currentProgress,
                                   onProgressChanged: (newProgress) {
-                                    readingProgress.value = newProgress;
+                                    // Update progress in the library cubit
+                                    print("📊 Progress changed to: $newProgress");
+                                    libraryCubit.updateBookProgress(bookId, newProgress);
+                                    if (currentStatus.value != 'reading') {
+                                      currentStatus.value = 'reading';
+                                    }
                                   },
                                   book: book,
-                                  bookId: bookId
-                              ),
-                            );
+                                  bookId: bookId,
+                                ),
+                              );
+                            } else {
+                              return SizedBox.shrink();
+                            }
                           }
                       ),
+
                       SizedBox(height: 12.h,),
                       // Add to List button
                       CustButton(

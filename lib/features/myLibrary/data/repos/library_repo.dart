@@ -69,30 +69,33 @@ class LibraryRepository {
     required String bookId,
     required String status,
     required Items book,
-    double progress = 0.0,
+    double? progress,
   }) async {
     print("📦 Upserting: userId=$userId, bookId=$bookId, status=$status, progress=$progress");
 
-    await _client.from('books').upsert({
-      'book_id': book.id,
-      'title': book.volumeInfo?.title,
-      'authors': book.volumeInfo?.authors,
-      'thumbnail_url': book.volumeInfo?.imageLinks?.thumbnail,
-      'published_date': book.volumeInfo?.publishedDate,
-      'page_count': book.volumeInfo?.pageCount,
-      'categories': book.volumeInfo?.categories,
-      'description': book.volumeInfo?.description,
-      'average_rating': book.volumeInfo?.averageRating,
-      'ratings_count': book.volumeInfo?.ratingsCount,
-    });
     try{
+      await _client.from('books').upsert({
+        'book_id': book.id,
+        'title': book.volumeInfo?.title,
+        'authors': book.volumeInfo?.authors,
+        'thumbnail_url': book.volumeInfo?.imageLinks?.thumbnail,
+        'published_date': book.volumeInfo?.publishedDate,
+        'page_count': book.volumeInfo?.pageCount,
+        'categories': book.volumeInfo?.categories,
+        'description': book.volumeInfo?.description,
+        'average_rating': book.volumeInfo?.averageRating,
+        'ratings_count': book.volumeInfo?.ratingsCount,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
       final response = await _client.from('user_books').upsert({
         'user_id': userId,
         'book_id': bookId,
         'status': status,
-        'progress': progress,
+        'progress': progress ?? 0.0,
         'updated_date': DateTime.now().toIso8601String(),
-      },onConflict:'user_id,book_id');
+      },onConflict:'user_id,book_id').select();
+
       if (response == null) {
         print("❌ Supabase response is null");
       } else {
@@ -100,8 +103,56 @@ class LibraryRepository {
       }
     }catch (e) {
       print("🔥 Supabase upsert failed: $e");
+      rethrow; // Important: rethrow to let cubit handle the error
     }
 
+  }
+
+  Future<bool> doesUserBookExist(String userId, String bookId) async {
+    try {
+      final response = await _client
+          .from('user_books')
+          .select()
+          .eq('user_id', userId)
+          .eq('book_id', bookId)
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      print("Error checking user book existence: $e");
+      return false;
+    }
+  }
+
+  // In LibraryRepository
+  Future<void> fixMissingUserBooks() async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser!.id;
+
+      final userBookIds = _client
+          .from('user_books')
+          .select('book_id')
+          .eq('user_id', userId);
+
+      final orphanedBooks = await _client
+          .from('books')
+          .select('book_id')
+          .filter('book_id', 'not.in', userBookIds);
+
+      for (final book in orphanedBooks) {
+        await _client.from('user_books').insert({
+          'user_id': userId,
+          'book_id': book['id'],
+          'status': 'none',
+          'progress': 0.0,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+        print("✅ Fixed orphaned book: ${book['id']}");
+      }
+    } catch (e) {
+      print("Error fixing orphaned books: $e");
+    }
   }
 
   Future<void> updateProgress({

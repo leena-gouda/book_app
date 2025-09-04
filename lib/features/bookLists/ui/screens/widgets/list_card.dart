@@ -299,6 +299,10 @@ class ListCard extends StatelessWidget {
                           final authors = book.volumeInfo?.authors?.join(', ') ?? 'Unknown Author';
                           final bookId = book.id ?? '';
 
+                          print('🔍 Book object: ${book.toString()}');
+                          print('🔍 Book ID from .id: ${book.id}');
+                          print('🔍 Book data: ${book.volumeInfo?.toJson()}'); // If you have a toJson method
+
                           final imageUrl = book.volumeInfo?.imageLinks?.thumbnail ??
                               (bookId.isNotEmpty
                                   ? 'https://books.google.com/books/content?id=$bookId&printsec=frontcover&img=1&zoom=1&source=gbs_api'
@@ -354,6 +358,16 @@ class ListCard extends StatelessWidget {
                             trailing: IconButton(
                               icon: Icon(Icons.remove_circle, color: Colors.red),
                               onPressed: () {
+                                if (bookId.isEmpty) {
+                                  print('❌ Cannot remove book: ID is empty');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Cannot remove book: missing ID'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                  return;
+                                }
                                 print('🗑️ Removing book ID: $bookId from list: ${list.id}');
                                 context.read<ListCubit>().removeBookFromList(list.id, bookId);
                                 ScaffoldMessenger.of(context).showSnackBar(

@@ -5,6 +5,7 @@ import 'package:book_app/features/auth/login/ui/screens/login_screen.dart';
 import 'package:book_app/features/home/ui/cubit/home_cubit.dart';
 import 'package:book_app/features/home/ui/cubit/navigation_cubit.dart';
 import 'package:book_app/features/home/ui/screens/widgets/book_list_card.dart';
+import 'package:book_app/features/home/ui/screens/widgets/see_all_screen.dart';
 import 'package:book_app/features/myLibrary/ui/screens/widgets/book_card.dart';
 import 'package:book_app/features/bookDetails/ui/screens/book_details.dart';
 import 'package:book_app/features/home/ui/screens/widgets/book_search.dart';
@@ -15,6 +16,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/routing/routes.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -112,7 +115,14 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         CustomHomeTitle(text: "New Releases"),
                         const Spacer(),
-                        TextButton(onPressed: () {}, child: Text("See All")),
+                        TextButton(onPressed: () {
+                          Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
+                            'title': "New Releases",
+                            'items': state.newReleases,
+                            'filterText': 'Filter by Genre:',
+                            //'numberOfItems': state.newReleases?.length ?? 0,
+                          });
+                        }, child: Text("See All")),
                       ],
                     ),
                     SizedBox(height: 5.h),
@@ -129,7 +139,14 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         CustomHomeTitle(text: "Trending Now"),
                         Spacer(),
-                        TextButton(onPressed: () {}, child: Text("See All")),
+                        TextButton(onPressed: () {
+                          Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
+                            'title': "Trending Books",
+                            'items': state.trendingBooks,
+                            'filterText': 'Filter by Genre:',
+                            //'numberOfItems': state.trendingBooks?.length ?? 0,
+                          });
+                        }, child: Text("See All")),
                       ],
                     ),
                     SizedBox(height: 5.h),
@@ -144,7 +161,14 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         CustomHomeTitle(text: "Recommended"),
                         Spacer(),
-                        TextButton(onPressed: () {}, child: Text("See All")),
+                        TextButton(onPressed: () {
+                          Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
+                            'title': "Recommended Books",
+                            'items': state.noteworthyBooks,
+                            'filterText': 'Filter by Genre:',
+                            //'numberOfItems': state.noteworthyBooks?.length ?? 0,
+                          });
+                        }, child: Text("See All")),
                       ],
                     ),
                     SizedBox(height: 5.h),
