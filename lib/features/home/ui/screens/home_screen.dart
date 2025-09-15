@@ -5,6 +5,7 @@ import 'package:book_app/features/auth/login/ui/screens/login_screen.dart';
 import 'package:book_app/features/dashboard/ui/screens/dashboard_screen.dart';
 import 'package:book_app/features/home/ui/cubit/home_cubit.dart';
 import 'package:book_app/features/home/ui/cubit/navigation_cubit.dart';
+import 'package:book_app/features/home/ui/screens/widgets/book_card.dart';
 import 'package:book_app/features/home/ui/screens/widgets/book_list_card.dart';
 import 'package:book_app/features/home/ui/screens/widgets/see_all_screen.dart';
 import 'package:book_app/features/myLibrary/ui/screens/widgets/book_card.dart';
@@ -23,6 +24,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/routing/routes.dart';
 import '../../../searchScreen/ui/screens/search_screen.dart';
 import '../../data/models/book_model.dart';
+
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
+  }
+}
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -110,104 +118,152 @@ class HomeScreen extends StatelessWidget {
             ),
           );
         } else if (state is HomeSuccess) {
-          return RefreshIndicator(
-            onRefresh: () => context.read<HomeCubit>().initializeData(),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Mock Data Toggle (using cubit property instead of state)
-                    // _buildMockDataToggle(context, cubit),
+          if (cubit.showGenreView) {
+            return _buildGenreBooksView(context, state, cubit);
+          }
+          return _buildNormalHomeView(context, state, cubit);
 
-                    Text(
-                      "Welcome back, Reader!",
-                      style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      "Discover your next favorite book",
-                      style: TextStyle(fontSize: 18.sp, color: AppColor.textGray),
-                    ),
-                    SizedBox(height: 20.h),
 
-                    // New Releases Section
-                    Row(
-                      children: [
-                        CustomHomeTitle(text: "New Releases"),
-                        const Spacer(),
-                        TextButton(onPressed: () {
-                          Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
-                            'title': "New Releases",
-                            'items': state.newReleases,
-                            'filterText': 'Filter by Genre:',
-                            //'numberOfItems': state.newReleases?.length ?? 0,
-                          });
-                        }, child: Text("See All")),
-                      ],
-                    ),
-                    SizedBox(height: 5.h),
-                    CustomHomeSubtitle(text: "Newly released books spanning various genres."),
-                    SizedBox(height: 20.h),
-                    BookListCard(
-                      books: state.newReleases ?? [],
-                    ),
 
-                    SizedBox(height: 30.h),
-
-                    // Trending Now Section
-                    Row(
-                      children: [
-                        CustomHomeTitle(text: "Trending Now"),
-                        Spacer(),
-                        TextButton(onPressed: () {
-                          Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
-                            'title': "Trending Books",
-                            'items': state.trendingBooks,
-                            'filterText': 'Filter by Genre:',
-                            //'numberOfItems': state.trendingBooks?.length ?? 0,
-                          });
-                        }, child: Text("See All")),
-                      ],
-                    ),
-                    SizedBox(height: 5.h),
-                    CustomHomeSubtitle(text: "Books everyone is talking about."),
-                    SizedBox(height: 20.h),
-                    BookListCard(
-                      books: state.trendingBooks ?? [],
-                    ),
-                    // New & Noteworthy Section
-                    SizedBox(height: 30.h),
-                  Row(
-                      children: [
-                        CustomHomeTitle(text: "Recommended"),
-                        Spacer(),
-                        TextButton(onPressed: () {
-                          Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
-                            'title': "Recommended Books",
-                            'items': state.noteworthyBooks,
-                            'filterText': 'Filter by Genre:',
-                            //'numberOfItems': state.noteworthyBooks?.length ?? 0,
-                          });
-                        }, child: Text("See All")),
-                      ],
-                    ),
-                    SizedBox(height: 5.h),
-                    CustomHomeSubtitle(text: "Editor’s picks and fresh releases worth your time."),
-                    SizedBox(height: 20.h),
-                    BookListCard(
-                      books: state.noteworthyBooks ?? [],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
         }
 
         return const Center(child: Text('No data available'));
       },
+    );
+  }
+
+  Widget _buildGenreBooksView(BuildContext context, HomeSuccess state, HomeCubit cubit) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            cubit.showAllBooks(); // This should reset showGenreView to false
+          },
+        ),
+        title: Text(
+          cubit.genres[cubit.currentGenreIndex].capitalize(),
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: state.books.isEmpty
+          ? Center(child: Text('No books found in this genre'))
+          : Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 15.w,
+            mainAxisSpacing: 15.h,
+            childAspectRatio: 0.7,
+          ),
+          itemCount: state.books.length,
+          itemBuilder: (context, index) {
+            final book = state.books[index];
+            return BookkCard(
+              book: book,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+// Your existing home view (renamed from the original content)
+  Widget _buildNormalHomeView(BuildContext context, HomeSuccess state, HomeCubit cubit) {
+    return RefreshIndicator(
+      onRefresh: () => context.read<HomeCubit>().initializeData(),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Mock Data Toggle (using cubit property instead of state)
+              // _buildMockDataToggle(context, cubit),
+
+              Text(
+                "Welcome back, Reader!",
+                style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                "Discover your next favorite book",
+                style: TextStyle(fontSize: 18.sp, color: AppColor.textGray),
+              ),
+              SizedBox(height: 20.h),
+
+              // New Releases Section
+              Row(
+                children: [
+                  CustomHomeTitle(text: "New Releases"),
+                  const Spacer(),
+                  TextButton(onPressed: () {
+                    Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
+                      'title': "New Releases",
+                      'items': state.newReleases,
+                      'filterText': 'Filter by Genre:',
+                      //'numberOfItems': state.newReleases?.length ?? 0,
+                    });
+                  }, child: Text("See All")),
+                ],
+              ),
+              SizedBox(height: 5.h),
+              CustomHomeSubtitle(text: "Newly released books spanning various genres."),
+              SizedBox(height: 20.h),
+              BookListCard(
+                books: state.newReleases ?? [],
+              ),
+
+              SizedBox(height: 30.h),
+
+              // Trending Now Section
+              Row(
+                children: [
+                  CustomHomeTitle(text: "Trending Now"),
+                  Spacer(),
+                  TextButton(onPressed: () {
+                    Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
+                      'title': "Trending Books",
+                      'items': state.trendingBooks,
+                      'filterText': 'Filter by Genre:',
+                      //'numberOfItems': state.trendingBooks?.length ?? 0,
+                    });
+                  }, child: Text("See All")),
+                ],
+              ),
+              SizedBox(height: 5.h),
+              CustomHomeSubtitle(text: "Books everyone is talking about."),
+              SizedBox(height: 20.h),
+              BookListCard(
+                books: state.trendingBooks ?? [],
+              ),
+              // New & Noteworthy Section
+              SizedBox(height: 30.h),
+            Row(
+                children: [
+                  CustomHomeTitle(text: "Recommended"),
+                  Spacer(),
+                  TextButton(onPressed: () {
+                    Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
+                      'title': "Recommended Books",
+                      'items': state.noteworthyBooks,
+                      'filterText': 'Filter by Genre:',
+                      //'numberOfItems': state.noteworthyBooks?.length ?? 0,
+                    });
+                  }, child: Text("See All")),
+                ],
+              ),
+              SizedBox(height: 5.h),
+              CustomHomeSubtitle(text: "Editor’s picks and fresh releases worth your time."),
+              SizedBox(height: 20.h),
+              BookListCard(
+                books: state.noteworthyBooks ?? [],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -246,9 +302,23 @@ class HomeScreen extends StatelessWidget {
           color: AppColor.primaryColor,
         ),
       ),
-      leading: IconButton(
-        onPressed: () {},
+      leading: PopupMenuButton<String>(
         icon: Icon(Icons.menu, size: 20.sp),
+        onSelected: (genre) {
+          // Get the index of the selected genre
+          final index = context.read<HomeCubit>().genres.indexOf(genre);
+          if (index != -1) {
+            context.read<HomeCubit>().getBooksByGenre(genre, index);
+          }
+        },
+        itemBuilder: (BuildContext context) {
+          return context.read<HomeCubit>().genres.map((String genre) {
+            return PopupMenuItem<String>(
+              value: genre,
+              child: Text(genre.capitalize()), // Add capitalize extension if needed
+            );
+          }).toList();
+        },
       ),
       actions: [
         // IconButton(

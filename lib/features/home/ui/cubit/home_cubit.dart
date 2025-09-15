@@ -641,6 +641,7 @@ class HomeCubit extends Cubit<HomeState> {
     });
   }
 
+
   Future<void> searchBooks(String query) async {
     _searchTimer?.cancel();
 
