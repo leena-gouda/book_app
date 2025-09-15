@@ -16,6 +16,17 @@ class ReviewRepository {
     try {
       final userName = user.email?.split('@').first ?? 'Anonymous';
 
+      final existingReview = await _client
+          .from('reviews')
+          .select('rating')
+          .eq('book_id', bookId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      final double? existingRating = existingReview?['rating'] != null
+          ? (existingReview!['rating'] as num).toDouble()
+          : null;
+
       // Use UPSERT to handle both insert and update in one operation
       print('Using upsert for review...');
       await _client
@@ -33,6 +44,9 @@ class ReviewRepository {
 
       print('Review upserted successfully');
 
+      await _updateBookRatings(bookId, rating, existingRating);
+
+
     } on PostgrestException catch (e) {
       print('Postgrest error: ${e.message}');
       throw Exception('Database error: ${e.message}');
@@ -40,6 +54,47 @@ class ReviewRepository {
       print('Unexpected error: $e');
       throw Exception('Failed to submit review: $e');
     }
+  }
+
+  Future<void> _updateBookRatings(String bookId, double newRating, double? existingRating) async {
+    // Get current book ratings
+    final bookResponse = await _client
+        .from('books')
+        .select('average_rating, ratings_count')
+        .eq('book_id', bookId)
+        .single();
+
+    final double currentAverage = bookResponse['average_rating'] != null
+        ? (bookResponse['average_rating'] as num).toDouble()
+        : 0.0;
+
+    final int currentCount = bookResponse['ratings_count'] != null
+        ? (bookResponse['ratings_count'] as int)
+        : 0;
+
+    double newAverage;
+    int newCount;
+
+    if (existingRating == null) {
+      // This is a new review
+      newCount = currentCount + 1;
+      newAverage = ((currentAverage * currentCount) + newRating) / newCount;
+    } else {
+      // This is an updated review
+      newCount = currentCount; // Count stays the same
+      newAverage = ((currentAverage * currentCount) - existingRating + newRating) / currentCount;
+    }
+
+    // Update the book with new ratings
+    await _client
+        .from('books')
+        .update({
+      'average_rating': newAverage,
+      'ratings_count': newCount,
+    })
+        .eq('book_id', bookId);
+
+    print('Updated book ratings: average=$newAverage, count=$newCount');
   }
 
   Stream<List<Map<String, dynamic>>> getReviews(String bookId) {
@@ -64,4 +119,32 @@ class ReviewRepository {
       return Stream.value([]); // Return empty stream on creation error
     }
   }
+
+  // Get all reviews by current user
+  Future<List<Map<String, dynamic>>> getUserReviews() async {
+    try {
+      final user = _client.auth.currentUser;
+      if (user == null) return [];
+
+      final response = await _client
+          .from('reviews')
+          .select('''
+            *,
+            books:book_id (
+              book_id,
+              title,
+              authors,
+              thumbnail_url
+            )
+          ''')
+          .eq('user_id', user.id)
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      print('Error getting user reviews: $e');
+      return [];
+    }
+  }
+
 }

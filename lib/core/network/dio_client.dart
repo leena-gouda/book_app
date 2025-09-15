@@ -89,4 +89,5 @@ class DioClient {
       cancelToken: cancelToken,
     );
   }
+
 }

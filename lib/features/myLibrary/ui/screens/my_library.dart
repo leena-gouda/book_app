@@ -23,7 +23,15 @@ class MyLibrary extends StatelessWidget {
     // In your widget or somewhere accessible
 
     return Scaffold(
-      appBar: AppBar(toolbarHeight: 0),
+      appBar: AppBar(
+        // leading: Navigator.canPop(context)
+        //     ? IconButton(
+        //   onPressed: () => Navigator.pop(context),
+        //   icon: const Icon(Icons.arrow_back),
+        // )
+        //     : null,
+      ),
+
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12.0),

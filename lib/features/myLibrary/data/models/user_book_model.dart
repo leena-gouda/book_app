@@ -4,10 +4,9 @@ class UserBook {
   final int id;
   final String bookId;
   final String status;
-  final int currentPage;
   final int? rating;
   final String? notes;
-  final DateTime? startedDate;
+  final DateTime? updatedDate;
   final DateTime? finishedDate;
   final DateTime createdAt;
   final Items bookDetails;
@@ -17,10 +16,9 @@ class UserBook {
     required this.id,
     required this.bookId,
     required this.status,
-    required this.currentPage,
     this.rating,
     this.notes,
-    this.startedDate,
+    this.updatedDate,
     this.finishedDate,
     required this.createdAt,
     required this.bookDetails,
@@ -60,10 +58,9 @@ class UserBook {
       id: json['id'],
       bookId: json['book_id'],
       status: json['status'],
-      currentPage: json['current_page'] ?? 0,
       rating: json['rating'],
       notes: json['notes'] ?? '',
-      startedDate: json['updated_date'] != null
+      updatedDate: json['updated_date'] != null
           ? DateTime.parse(json['updated_date'])
           : null,
 
@@ -81,10 +78,9 @@ class UserBook {
       id: id,
       bookId: bookId,
       status: status,
-      currentPage: currentPage,
       rating: rating,
       notes: notes,
-      startedDate: startedDate,
+      updatedDate: updatedDate,
       finishedDate: finishedDate,
       createdAt: createdAt,
       bookDetails: bookDetails,
@@ -97,10 +93,9 @@ class UserBook {
       'id': id,
       'book_id': bookId,
       'status': status,
-      'current_page': currentPage,
       'rating': rating,
       'notes': notes,
-      'started_date': startedDate?.toIso8601String(),
+      'updatedDate': updatedDate?.toIso8601String(),
       'finished_date': finishedDate?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'books': bookDetails.toJson(),

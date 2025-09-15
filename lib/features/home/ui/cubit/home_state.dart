@@ -7,7 +7,7 @@ final class HomeInitial extends HomeState {}
 
 final class HomeLoading extends HomeState {}
 
-final class HomeSuccess extends HomeState {
+class HomeSuccess extends HomeState {
   final List<Items> books;
   final List<Items> trendingBooks;
   final List<Items> newReleases;

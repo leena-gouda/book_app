@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../home/data/models/book_model.dart';
 
 class ReadingProgressBar extends StatefulWidget {
@@ -64,7 +65,7 @@ class _ReadingProgressBarState extends State<ReadingProgressBar> {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: AppColor.primaryColor,
               ),
             ),
           ]
@@ -82,10 +83,10 @@ class _ReadingProgressBarState extends State<ReadingProgressBar> {
                     overlayShape: RoundSliderOverlayShape(
                       overlayRadius: 6.w,
                     ),
-                    activeTrackColor: Colors.blue,
+                    activeTrackColor: AppColor.primaryColor,
                     inactiveTrackColor: Colors.grey[300],
-                    thumbColor: Colors.blue,
-                    overlayColor: Colors.blue.withOpacity(0.2),
+                    thumbColor: AppColor.primaryColor,
+                    overlayColor: AppColor.primaryColor.withOpacity(0.2),
                   ),
                   child: Slider(
                     value: _currentProgress.clamp(0.0, 1.0),

@@ -1,8 +1,11 @@
 import 'package:book_app/core/theme/app_colors.dart';
 import 'package:book_app/core/widgets/custom_button.dart';
 import 'package:book_app/features/Reviews/ui/screens/Widgets/custom_review_section.dart';
+import 'package:book_app/features/bookDetails/ui/cubit/ebook_cubit.dart';
 import 'package:book_app/features/bookDetails/ui/screens/widgets/custom_button.dart';
 import 'package:book_app/features/bookDetails/ui/screens/widgets/custom_rating_stars.dart';
+import 'package:book_app/features/bookDetails/ui/screens/widgets/ebook_access_dialog.dart';
+import 'package:book_app/features/bookDetails/ui/screens/widgets/ebook_reader_screen.dart';
 import 'package:book_app/features/bookDetails/ui/screens/widgets/progress_bar.dart';
 import 'package:book_app/features/home/data/models/book_model.dart';
 import 'package:book_app/features/bookDetails/ui/screens/widgets/custom_description.dart';
@@ -12,12 +15,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/routing/routes.dart';
 import '../../../Reviews/ui/cubit/review_cubit.dart';
 import '../../../bookLists/data/repos/list_repo.dart';
 import '../../../bookLists/ui/cubit/list_cubit.dart';
 import '../../../bookLists/ui/screens/widgets/add_to_list.dart';
 import '../../../myLibrary/data/models/user_book_model.dart';
 import '../../../myLibrary/ui/cubit/my_library_cubit.dart';
+
+import 'package:url_launcher/url_launcher_string.dart';
 
 class BookDetails extends StatelessWidget {
   final Items book;
@@ -31,6 +37,15 @@ class BookDetails extends StatelessWidget {
   BookDetails({super.key, required this.book, double? progress, this.userBook})
       : currentStatus = ValueNotifier(userBook?.status ?? 'none');
 
+  String _fixImageUrl(String url) {
+    if (url.isEmpty) return url;
+
+    String fixedUrl = url.replaceFirst('http://', 'https://');
+    fixedUrl = fixedUrl.replaceAll('\n', '').replaceAll(' ', '');
+
+    return fixedUrl;
+  }
+
   static Widget withProgress(UserBook book) {
     return BookDetails(book: book.bookDetails,userBook: book,);
   }
@@ -39,9 +54,13 @@ class BookDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final reviewCubit = context.read<ReviewCubit>();
     final bookId = book.id ?? 'unknown_id';
+    final ebookCubit = context.read<EBookCubit>();
+
     print('Using bookId: $bookId');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       reviewCubit.loadReviews(bookId);
+      ebookCubit.checkEbookAccess(bookId);
+
     });
     // currentStatus.addListener(() {
     //   if (currentStatus.value == 'reading' && readingProgress.value == 0.0) {
@@ -61,14 +80,15 @@ class BookDetails extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                if (book.volumeInfo?.imageLinks?.thumbnail != null)
+                  Container(
                   alignment: Alignment.center,
                   width: 395.w,
                   height: 336.h,
                   color: Colors.grey[300],
                   child: book.volumeInfo?.imageLinks?.thumbnail != null
                       ? Image.network(
-                    book.volumeInfo?.imageLinks?.thumbnail ?? '',
+                    _fixImageUrl(book.volumeInfo!.imageLinks!.thumbnail!),
                     height: 280.h,
                     width: 180.w,
                     fit: BoxFit.cover,
@@ -132,12 +152,100 @@ class BookDetails extends StatelessWidget {
                           CustomRatingStars(rating: book.volumeInfo?.averageRating ?? 0),
                           SizedBox(width: 5.w,),
                           Text("${book.volumeInfo?.averageRating ?? '0'}"),
-                          SizedBox(width: 4.w),
-                          Text("(${book.volumeInfo?.ratingsCount ?? '0'} reviews)"),
+                          // SizedBox(width: 4.w),
+                          // Text("(${book.volumeInfo?.ratingsCount ?? '0'} reviews)"),
                         ],
                       ),
                     ],
                   ),
+                ),
+                SizedBox(height: 20.h),
+                BlocConsumer<EBookCubit, EBookState>(
+                  listener: (context, state) {
+                    if (state is EBookError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.message)),
+                      );
+                    } else if (state is EBookDownloadUrlReady) {
+                      // Handle download - launch URL or show download options
+                      _launchDownloadUrl(state.downloadUrl, state.format,context);
+                    }
+                  },
+                  builder: (context, state) {
+                    final isEbookAvailable = book.saleInfo?.isEbook == true ||
+                        book.accessInfo?.epub?.isAvailable == true ||
+                        book.accessInfo?.pdf?.isAvailable == true;
+                    return Container(
+                      width: 395.w,
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.9),
+                            spreadRadius: 1,
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.phone_iphone,color: AppColor.primaryColor,),
+                              SizedBox(width: 8.w),
+                              Text(
+                                isEbookAvailable ? 'Available as eBook' : 'Not available as eBook',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: isEbookAvailable ? Colors.green : Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: 8.h),
+                          if (isEbookAvailable)...[
+                            if (isEbookAvailable) _buildEbookAccessUI(context, book.id ?? '', state),
+                              // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.center,
+                            //   children: [
+                            //     Expanded(
+                            //       child: CustButton(
+                            //         text: "Read Now",
+                            //         onPressed: ()=> _handleEbookAccess(context, bookId, false),
+                            //         iconData: CupertinoIcons.book,
+                            //         margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                            //         textColor: AppColor.black,
+                            //         iconColor: AppColor.black,
+                            //         hasBorder: true,
+                            //         borderRadius: 12.r,
+                            //       ),
+                            //     ),
+                            //     SizedBox(width: 20.w,),
+                            //     Expanded(
+                            //       child: CustButton(
+                            //         text: "Download",
+                            //         onPressed: () => _handleEbookAccess(context, bookId, true),
+                            //         iconData: Icons.download_sharp,
+                            //         margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                            //         textColor: AppColor.black,
+                            //         iconColor: AppColor.black,
+                            //         hasBorder: true,
+                            //         borderRadius: 12.r,
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
+
+                          ]
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(height: 20.h),
                 Container(
@@ -338,7 +446,7 @@ class BookDetails extends StatelessWidget {
                       SizedBox(height: 12.h),
                       CustomDescription(text1: "Genre", text2: book.volumeInfo?.categories?.first ?? 'Unknown'),
                       SizedBox(height: 12.h,),
-                      CustomButton(text: "More Details", onPressed: (){_showBookDetails(context);},iconData: CupertinoIcons.info,backgroundColor: Colors.grey[300],textColor: CupertinoColors.systemBlue,iconColor: CupertinoColors.systemBlue,),
+                      CustomButton(text: "More Details", onPressed: (){_showBookDetails(context);},iconData: CupertinoIcons.info,backgroundColor: Colors.grey[300],textColor: AppColor.primaryColor,iconColor: AppColor.primaryColor,),
                     ],
                   ),
                 ),
@@ -562,6 +670,51 @@ class BookDetails extends StatelessWidget {
     );
   }
 
+  void _handleEbookAccess(BuildContext context, String bookId, bool isDownload) {
+    final ebookCubit = context.read<EBookCubit>();
+
+    // Check access and show appropriate dialog or open eBook
+    ebookCubit.checkEbookAccess(bookId).then((_) {
+      final state = ebookCubit.state;
+
+      if (state is EBookAccessChecked) {
+        if (state.hasAccess) {
+          if (isDownload) {
+            // Download eBook
+            if (state.downloadUrl != null) {
+              ebookCubit.openEbook(bookId, customUrl: state.downloadUrl);
+            }
+          } else {
+            // Read eBook
+            Navigator.pushNamed(
+              context,
+              Routes.ebookReaderScreen,arguments: {
+                'bookId': bookId,
+                'ebookUrl': state.downloadUrl,
+              }
+            );
+          }
+        } else {
+          // Show purchase dialog
+          showDialog(
+            context: context,
+            builder: (context) => EBookAccessDialog(
+              hasAccess: state.hasAccess,
+              downloadUrl: state.downloadUrl,
+              onPurchase: () => ebookCubit.purchaseEbook(bookId, state.price.toDouble()),
+              onDownload: () {
+                Navigator.pop(context);
+                if (state.downloadUrl != null) {
+                  ebookCubit.openEbook(bookId, customUrl: state.downloadUrl);
+                }
+              }, ebookUrl: state.downloadUrl!, bookTitle: book.volumeInfo?.title ?? 'unknown', bookId: bookId,
+            ),
+          );
+        }
+      }
+    });
+  }
+
   void _showAddToListBottomSheet(BuildContext context, Items book) {
     showModalBottomSheet(
       context: context,
@@ -571,4 +724,249 @@ class BookDetails extends StatelessWidget {
       },
     );
   }
+  Widget _buildEbookAccessButtons(BuildContext context, String bookId, String? downloadUrl) {
+    return BlocConsumer<EBookCubit, EBookState>(
+      listener: (context, state) {
+        if (state is EBookError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state is EBookLoading) {
+          return _buildLoadingButton();
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: CustButton(
+                text: "Read Now",
+                onPressed: () => _handleReadNow(context, bookId),
+                iconData: CupertinoIcons.book,
+                margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                textColor: AppColor.black,
+                iconColor: AppColor.black,
+                hasBorder: true,
+                borderRadius: 12.r,
+              ),
+            ),
+            SizedBox(width: 20.w),
+            Expanded(
+              child: CustButton(
+                text: "Download",
+                onPressed: () => _handleDownload(context, bookId, downloadUrl),
+                iconData: Icons.download_sharp,
+                margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                textColor: AppColor.black,
+                iconColor: AppColor.black,
+                hasBorder: true,
+                borderRadius: 12.r,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+// In your BookDetails widget, add a refresh button or automatic refresh
+  void _refreshEbookAccess(BuildContext context, String bookId) {
+    final ebookCubit = context.read<EBookCubit>();
+    ebookCubit.resetState(); // Clear previous state
+    ebookCubit.checkEbookAccess(bookId);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Refreshing eBook access...')),
+    );
+  }
+
+// Call this after purchase completes
+  Widget _buildPurchaseButton(BuildContext context, String bookId, double price) {
+    return CustButton(
+      text: "Purchase (\$${price.toStringAsFixed(2)})",
+      onPressed: () async {
+        final ebookCubit = context.read<EBookCubit>();
+
+        // Show loading
+        ebookCubit.emit(EBookLoading());
+
+        try {
+          await ebookCubit.purchaseEbook(bookId,price.toDouble());
+
+          // Refresh access check AFTER purchase completes
+          _refreshEbookAccess(context, bookId);
+
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Purchase failed: $e')),
+          );
+        }
+      },
+      iconData: Icons.shopping_cart,
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      textColor: AppColor.white,
+      iconColor: AppColor.white,
+      backgroundColor: AppColor.primaryColor,
+      hasBorder: false,
+      borderRadius: 12.r,
+    );
+  }
+
+  Widget _buildLoadingButton() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildCheckAccessButton(BuildContext context, String bookId) {
+    return CustButton(
+      text: "Check Access",
+      onPressed: () => context.read<EBookCubit>().checkEbookAccess(bookId),
+      iconData: Icons.refresh,
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      textColor: AppColor.black,
+      iconColor: AppColor.black,
+      hasBorder: true,
+      borderRadius: 12.r,
+    );
+  }
+
+  Future<void> _handleReadNow(BuildContext context, String bookId) async {
+    final ebookCubit = context.read<EBookCubit>();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final bookContent = await ebookCubit.getBookContent(bookId);
+      Navigator.pop(context); // Close loading dialog
+
+      if (bookContent['type'] == 'webview') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EBookReaderScreen(
+              bookTitle: book.volumeInfo?.title ?? 'E-Book',
+              bookContent: bookContent,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(bookContent['message'])),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load book: $e')),
+      );
+    }
+  }
+  void _handleDownload(BuildContext context, String bookId, String? downloadUrl) {
+    if (downloadUrl != null) {
+      context.read<EBookCubit>().openEbook(bookId, customUrl: downloadUrl);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No download URL available')),
+      );
+    }
+  }
+
+  Widget _buildEbookAccessUI(BuildContext context, String bookId, EBookState state) {
+    if (state is EBookLoading) {
+      return _buildLoadingButton();
+    } else if (state is EBookAccessChecked) {
+      if (state.hasAccess) {
+        return Column(
+          children: [
+            // Read Now button
+            CustButton(
+              text: "Read Now",
+              onPressed: () => _handleReadNow(context, bookId),
+              iconData: CupertinoIcons.book,
+              margin: EdgeInsets.symmetric(vertical: 8.h),
+              textColor: AppColor.black,
+              iconColor: AppColor.black,
+              hasBorder: true,
+              borderRadius: 12.r,
+            ),
+            SizedBox(height: 8.h),
+
+            // Download options dropdown
+            // if (state.isEpubAvailable || state.isPdfAvailable)
+            //   _buildDownloadOptions(context, bookId, state),
+          ],
+        );
+      } else {
+        return _buildPurchaseButton(context, bookId, state.price);
+      }
+    } else if (state is EBookError) {
+      return Text(
+        state.message,
+        style: TextStyle(color: Colors.red),
+      );
+    } else {
+      return _buildCheckAccessButton(context, bookId);
+    }
+  }
+
+  Widget _buildDownloadOptions(BuildContext context, String bookId, EBookAccessChecked state) {
+    final ebookCubit = context.read<EBookCubit>();
+
+    return PopupMenuButton<String>(
+      onSelected: (format) {
+        if (format == 'epub' && state.isEpubAvailable) {
+          ebookCubit.downloadEpub(bookId);
+        } else if (format == 'pdf' && state.isPdfAvailable) {
+          ebookCubit.downloadPdf(bookId);
+        }
+      },
+      itemBuilder: (context) => [
+        if (state.isEpubAvailable)
+          PopupMenuItem(
+            value: 'epub',
+            child: Text('Download EPUB'),
+          ),
+        if (state.isPdfAvailable)
+          PopupMenuItem(
+            value: 'pdf',
+            child: Text('Download PDF'),
+          ),
+      ],
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColor.black),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.download, size: 20.w),
+            SizedBox(width: 8.w),
+            Text('Download Options', style: TextStyle(fontSize: 14.sp)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchDownloadUrl(String? url, String format,BuildContext context) async {
+    if (url != null && await canLaunchUrlString(url)) {
+      await launchUrlString(url);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Cannot open URL')),
+      );
+    }
+  }
+
 }

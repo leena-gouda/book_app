@@ -8,6 +8,11 @@ class Routes {
   static const String reviewsScreen = '/reviews-screen';
   static const String myLibraryScreen = '/my-library-screen';
   static const String seeAllScreen = '/see-all-screen';
+  static const String searchScreen = '/search-screen';
+  static const String dashboardScreen = '/dashboard-screen';
+  static const String ebookReaderScreen = '/ebook-reader-screen';
+  static const String profileScreen = '/profile-screen';
+  static const String userReviewScreen = '/user-review-screen';
 
 
 

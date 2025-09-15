@@ -24,7 +24,7 @@ void showLoadingApp(BuildContext context) {
             // const SizedBox(height: 16),
             16.verticalSpace,
             Text(
-              'برجاء الانتظار...',
+              'Please wait...',
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,

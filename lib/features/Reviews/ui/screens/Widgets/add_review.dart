@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../../core/theme/app_colors.dart';
+
 class AddReviewBottomSheetContent extends StatelessWidget {
   final String bookId;
 
@@ -123,7 +125,7 @@ class AddReviewBottomSheetContent extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: CupertinoButton(
-                    color: CupertinoColors.activeBlue,
+                    color: AppColor.primaryColor,
                     borderRadius: BorderRadius.circular(12.r),
                     onPressed: isSubmitting ? null : () => submitReview(setState),
                     child: isSubmitting

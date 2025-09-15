@@ -66,7 +66,7 @@ class CustomReviewSection extends StatelessWidget {
                         ),
                       ),
                       Spacer(),
-                      CustButton(text: "Add Review", onPressed:() => _addReview(context), margin: EdgeInsets.symmetric(),backgroundColor: CupertinoColors.activeBlue,borderRadius: 12.r,height: 30.h,iconData: CupertinoIcons.plus,iconColor: AppColor.white,),
+                      CustButton(text: "Add Review", onPressed:() => _addReview(context), margin: EdgeInsets.symmetric(),backgroundColor: AppColor.primaryColor,borderRadius: 12.r,height: 30.h,iconData: CupertinoIcons.plus,iconColor: AppColor.white,),
                       if (reviews.isNotEmpty)
                         CupertinoButton(
                           padding: EdgeInsets.zero,

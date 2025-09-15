@@ -28,7 +28,7 @@ class MockBooksRepo implements BooksApiRepo {
   }
 
   @override
-  Future<List<Items>> searchBooks(String query) async {
+  Future<List<Items>> searchBooks(String query,{String? genre}) async {
     await Future.delayed(const Duration(milliseconds: 500));
     final lowercaseQuery = query.toLowerCase();
     return _allMockBooks

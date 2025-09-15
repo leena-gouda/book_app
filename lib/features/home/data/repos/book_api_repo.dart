@@ -16,14 +16,22 @@ class BooksApiRepo {
   BooksApiRepo(this._dioClient);
 
   // 1. SEARCH FOR BOOKS
-  Future<List<Items>> searchBooks(String query) async {
+  Future<List<Items>> searchBooks(String query, {String? genre}) async {
+    // Prevent 400 by giving fallback query
+    String q = query.trim().isEmpty ? "a" : query.trim();
+
+    // Add genre to query if provided
+    if (genre != null && genre.isNotEmpty) {
+      q += "+subject:$genre";
+    }
+
     return _cachedApiCall(
-      'search_$query',
+      'search_$q',
           () async {
         final response = await _dioClient.get(
           EndpointConstants.volumes,
           queryParameters: {
-            "q": query,
+            "q": q,
             "maxResults": "25",
             "key": _apiKey,
           },
@@ -34,6 +42,7 @@ class BooksApiRepo {
       },
     );
   }
+
 
   // 2. GET BOOKS BY GENRE
   Future<List<Items>> getBooksByGenre(String genre) async {

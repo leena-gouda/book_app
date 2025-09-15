@@ -2,6 +2,7 @@ import 'package:book_app/core/theme/app_colors.dart';
 import 'package:book_app/core/utils/extensions/navigation_extensions.dart';
 import 'package:book_app/core/widgets/custom_text_form_field.dart';
 import 'package:book_app/features/auth/login/ui/screens/login_screen.dart';
+import 'package:book_app/features/dashboard/ui/screens/dashboard_screen.dart';
 import 'package:book_app/features/home/ui/cubit/home_cubit.dart';
 import 'package:book_app/features/home/ui/cubit/navigation_cubit.dart';
 import 'package:book_app/features/home/ui/screens/widgets/book_list_card.dart';
@@ -12,18 +13,24 @@ import 'package:book_app/features/home/ui/screens/widgets/book_search.dart';
 import 'package:book_app/features/home/ui/screens/widgets/custom_home_subtitle.dart';
 import 'package:book_app/features/home/ui/screens/widgets/custom_home_title.dart';
 import 'package:book_app/features/myLibrary/ui/screens/my_library.dart';
+import 'package:book_app/features/profile/ui/screens/profile_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/routing/routes.dart';
+import '../../../searchScreen/ui/screens/search_screen.dart';
+import '../../data/models/book_model.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final userId =  Supabase.instance.client.auth.currentUser?.id;
+
     return BlocBuilder<NavigationCubit, int>(
       builder: (context, currentTab) {
         return Scaffold(
@@ -32,11 +39,26 @@ class HomeScreen extends StatelessWidget {
             index: currentTab,
             children: [
               _buildHomeContent(), // Home tab
-              const Placeholder(), // Search tab - replace with actual screen
-              MyLibrary(), // My Books tab - replace with actual screen
-              const Placeholder(), // Dashboard tab - replace with actual screen
+              BlocBuilder<HomeCubit, HomeState>(
+                builder: (context, state) {
+                  if (state is HomeSuccess) {
+                    return SearchScreen(
+                      allBooks: [
+                        ...state.newReleases ?? [],
+                        ...state.trendingBooks ?? [],
+                        ...state.noteworthyBooks ?? [],
+                      ],
+                    );
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                },
+              ),
+              MyLibrary(),
+              DashboardScreen(userId: userId!),
+              ProfileScreen(),
             ],
           ),
+
           bottomNavigationBar: _buildBottomNavigationBar(context, currentTab),
         );
       },
@@ -97,7 +119,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Mock Data Toggle (using cubit property instead of state)
-                    _buildMockDataToggle(context, cubit),
+                    // _buildMockDataToggle(context, cubit),
 
                     Text(
                       "Welcome back, Reader!",
@@ -229,21 +251,46 @@ class HomeScreen extends StatelessWidget {
         icon: Icon(Icons.menu, size: 20.sp),
       ),
       actions: [
-        IconButton(
-          icon: Icon(CupertinoIcons.bell, size: 20.sp),
-          onPressed: () {
-            // Handle notification icon press
-          },
-        ),
+        // IconButton(
+        //   icon: Icon(CupertinoIcons.bell, size: 20.sp),
+        //   onPressed: () {
+        //     // Handle notification icon press
+        //   },
+        // ),
         IconButton(
           icon: const Icon(Icons.search),
           onPressed: () {
-            showSearch(
-              context: context,
-              delegate: BookSearchDelegate(),
-            );
+            final homeState = context.read<HomeCubit>().state;
+            if (homeState is HomeSuccess) {
+              final List<Items> allBooks = [
+                ...homeState.newReleases ?? [],
+                ...homeState.trendingBooks ?? [],
+                ...homeState.noteworthyBooks ?? [],
+              ];
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SearchScreen(allBooks: allBooks),
+                ),
+              );
+            }
+
           },
-        )
+        ),
+
+        IconButton(
+          icon: const Icon(Icons.dashboard_outlined),
+          onPressed: () {
+              Navigator.pushNamed(
+                  context,
+                  Routes.dashboardScreen,arguments: {
+                    'userId': Supabase.instance.client.auth.currentUser?.id,
+                  }
+              );
+          },
+        ),
+
+
       ],
     );
   }
@@ -271,6 +318,10 @@ class HomeScreen extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.dashboard_outlined),
           label: 'Dashboard',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
         ),
       ],
     );

@@ -37,7 +37,7 @@ class SmallButtons extends StatelessWidget {
     this.circleColor,
     this.circleRadius = 12,
     this.circleTextColor = Colors.white,
-    this.selectedColor = Colors.blue,
+    this.selectedColor = AppColor.primaryColor,
     this.onPressed,
     required bool isSelected,
   });
