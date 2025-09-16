@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,7 +24,7 @@ class AddToListBottomSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Add to List',
+                'Add to List'.tr(),
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
@@ -59,14 +60,14 @@ class AddToListBottomSheet extends StatelessWidget {
                         children: [
                           Icon(Icons.list_alt, size: 64, color: Colors.grey),
                           SizedBox(height: 16),
-                          Text('No lists yet'),
+                          Text('No lists yet'.tr()),
                           SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: () {
                               Navigator.pop(context);
                               showCreateListDialog(context);
                             },
-                            child: Text('Create New List'),
+                            child: Text('Create New List'.tr()),
                           ),
                         ],
                       ),
@@ -92,7 +93,7 @@ class AddToListBottomSheet extends StatelessWidget {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Added to ${list.name}'),
+                              content: Text('Added to ${list.name}'.tr()),
                               duration: Duration(seconds: 2),
                             ),
                           );
@@ -118,7 +119,7 @@ class AddToListBottomSheet extends StatelessWidget {
               children: [
                 Icon(Icons.add, size: 20),
                 SizedBox(width: 8),
-                Text('Create New List'),
+                Text('Create New List'.tr()),
               ],
             ),
             style: ElevatedButton.styleFrom(
@@ -138,18 +139,18 @@ void showCreateListDialog(BuildContext context) {
       final textController = TextEditingController();
 
       return AlertDialog(
-        title: Text('Create New List'),
+        title: Text('Create New List'.tr()),
         content: TextField(
           controller: textController,
           decoration: InputDecoration(
-            hintText: 'Enter list name',
+            hintText: 'Enter list name'.tr(),
             border: OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: Text('Cancel'.tr()),
           ),
           ElevatedButton(
             onPressed: () {
@@ -160,13 +161,13 @@ void showCreateListDialog(BuildContext context) {
                 // Show success message
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('List created successfully'),
+                    content: Text('List created successfully'.tr()),
                     duration: Duration(seconds: 2),
                   ),
                 );
               }
             },
-            child: Text('Create'),
+            child: Text('Create'.tr()),
           ),
         ],
       );

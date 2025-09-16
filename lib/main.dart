@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:book_app/core/network/dio_client.dart';
 import 'package:book_app/features/Reviews/data/repo/review_repo.dart';
 import 'package:book_app/features/Reviews/ui/cubit/review_cubit.dart';
@@ -20,6 +22,7 @@ import 'package:book_app/features/myLibrary/ui/cubit/button_cubit.dart';
 import 'package:book_app/features/myLibrary/ui/cubit/my_library_cubit.dart';
 import 'package:book_app/features/profile/data/repos/profile_repo.dart';
 import 'package:book_app/features/profile/ui/cubit/profile_cubit.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,12 +34,22 @@ import 'app_bloc_observer.dart';
 import 'core/routing/app_router.dart';
 import 'core/routing/routes.dart';
 import 'features/home/ui/cubit/navigation_cubit.dart';
+import 'features/profile/ui/cubit/theme_cubit.dart';
 
 bool isLogin = false;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final ThemeData lightTheme = ThemeData(
+  brightness: Brightness.light,
+  primarySwatch: Colors.blue,
+);
 
+final ThemeData darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  primarySwatch: Colors.blue,
+);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
 
   try {
 
@@ -53,7 +66,11 @@ Future<void> main() async {
 
     await isLoggedIn();
 
-    runApp(MyApp(appRouter: AppRouter()));
+    runApp(EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('ar')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: MyApp(appRouter: AppRouter())));
   } catch (e) {
     debugPrint('Supabase initialization error: $e');
     runApp(const ErrorApp() as Widget);
@@ -96,26 +113,34 @@ class MyApp extends StatelessWidget {
           BlocProvider<EBookCubit>(create: (context) => EBookCubit(EBookRepository())),
           BlocProvider<ProfileCubit>(create: (context) => ProfileCubit(ProfileRepository())..loadProfile()),
           BlocProvider<UserReviewsCubit>(create: (context) => UserReviewsCubit(ReviewRepository())..loadUserReviews()),
-
+          BlocProvider<ThemeCubit>(create: (context) => ThemeCubit()),
 
         ],
-        child: MaterialApp(
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+  builder: (context, themeMode) {
+    return MaterialApp(
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
+          builder: (context, child) {
+            return Directionality(
+              textDirection: context.locale.languageCode == 'ar'
+                  ? ui.TextDirection.rtl
+                  : ui.TextDirection.ltr,
+              child: child!,
+            );
+          },
           navigatorKey: navigatorKey,
           title: 'Flutter Demo',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            scaffoldBackgroundColor: Colors.white,
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-              elevation: 0.0,
-            ),
-            useMaterial3: true,
-            fontFamily: GoogleFonts.poppins().fontFamily,
-          ),
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: themeMode,
           initialRoute: isLogin ? Routes.homeScreen : Routes.splashScreen,
           onGenerateRoute: appRouter.generateRoute,
-        ),
+        );
+  },
+),
       ),
     );
   }

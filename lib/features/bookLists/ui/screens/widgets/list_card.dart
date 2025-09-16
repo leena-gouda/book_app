@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -130,7 +131,7 @@ class ListCard extends StatelessWidget {
             children: [
               ListTile(
                 leading: Icon(Icons.edit),
-                title: Text('Edit List Name'),
+                title: Text('Edit List Name'.tr()),
                 onTap: () {
                   Navigator.pop(context);
                   _showEditListDialog(context, list);
@@ -138,7 +139,7 @@ class ListCard extends StatelessWidget {
               ),
               ListTile(
                 leading: Icon(Icons.delete, color: Colors.red),
-                title: Text('Delete List', style: TextStyle(color: Colors.red)),
+                title: Text('Delete List'.tr(), style: TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
                   _showDeleteListDialog(context, list);
@@ -159,18 +160,18 @@ class ListCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit List Name'),
+          title: Text('Edit List Name'.tr()),
           content: TextField(
             controller: textController,
             decoration: InputDecoration(
-              hintText: 'Enter new list name',
+              hintText: 'Enter new list name'.tr(),
               border: OutlineInputBorder(),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: Text('Cancel'.tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -179,7 +180,7 @@ class ListCard extends StatelessWidget {
                   Navigator.pop(context);
                 }
               },
-              child: Text('Save'),
+              child: Text('Save'.tr()),
             ),
           ],
         );
@@ -193,12 +194,12 @@ class ListCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete List'),
-          content: Text('Are you sure you want to delete "${list.name}"? This action cannot be undone.'),
+          title: Text('Delete List'.tr()),
+          content: Text('Are you sure you want to delete "${list.name}"? This action cannot be undone.'.tr()),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: Text('Cancel'.tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -207,13 +208,13 @@ class ListCard extends StatelessWidget {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('"${list.name}" deleted'),
+                    content: Text('"${list.name}" deleted'.tr()),
                     duration: Duration(seconds: 2),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: Text('Delete', style: TextStyle(color: Colors.white)),
+              child: Text('Delete'.tr(), style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -222,7 +223,7 @@ class ListCard extends StatelessWidget {
   }
 
   void _showListDetails(BuildContext context, CustomList list) {
-    print('🔄 Showing details for list: ${list.name} (ID: ${list.id})');
+    print('🔄 Showing details for list: ${list.name} (ID: ${list.id})'.tr());
 
     showModalBottomSheet(
       context: context,
@@ -236,7 +237,7 @@ class ListCard extends StatelessWidget {
 
             if (snapshot.hasError) {
               print('❌ Error fetching books: ${snapshot.error}');
-              return Center(child: Text('Error loading books'));
+              return Center(child: Text('Error loading books'.tr()));
             }
 
             final books = snapshot.data ?? [];
@@ -280,10 +281,10 @@ class ListCard extends StatelessWidget {
                           children: [
                             Icon(Icons.list_alt, size: 64, color: Colors.grey),
                             SizedBox(height: 16),
-                            Text('No books in this list yet'),
+                            Text('No books in this list yet'.tr()),
                             SizedBox(height: 8),
                             Text(
-                              'Add books from the book details page',
+                              'Add books from the book details page'.tr(),
                               style: TextStyle(color: Colors.grey),
                             ),
                           ],
@@ -344,13 +345,13 @@ class ListCard extends StatelessWidget {
                               ),
                             ),
                             title: Text(
-                              title,
+                              title.tr(),
                               style: TextStyle(fontWeight: FontWeight.bold),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                             subtitle: Text(
-                              authors,
+                              authors.tr(),
                               style: TextStyle(color: Colors.grey[600]),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -362,7 +363,7 @@ class ListCard extends StatelessWidget {
                                   print('❌ Cannot remove book: ID is empty');
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('Cannot remove book: missing ID'),
+                                      content: Text('Cannot remove book: missing ID'.tr()),
                                       duration: Duration(seconds: 2),
                                     ),
                                   );
@@ -372,7 +373,7 @@ class ListCard extends StatelessWidget {
                                 context.read<ListCubit>().removeBookFromList(list.id, bookId);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Removed from ${list.name}'),
+                                    content: Text('Removed from ${list.name}'.tr()),
                                     duration: Duration(seconds: 2),
                                   ),
                                 );

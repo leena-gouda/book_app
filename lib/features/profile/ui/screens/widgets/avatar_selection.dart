@@ -1,4 +1,5 @@
 // features/profile/ui/screens/widgets/avatar_selection.dart
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -22,8 +23,8 @@ class AvatarSelectionDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Select Avatar',
+            Text(
+              'Select Avatar'.tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -41,7 +42,7 @@ class AvatarSelectionDialog extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Avatar updated!")),
+                      SnackBar(content: Text("Avatar updated!".tr())),
                     );
                     Navigator.pop(context);
                     cubit.selectAvatarFromUrl(avatarUrls[index]);
@@ -67,7 +68,7 @@ class AvatarSelectionDialog extends StatelessWidget {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('Cancel'.tr()),
             ),
           ],
         ),

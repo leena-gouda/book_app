@@ -9,6 +9,7 @@ import 'package:book_app/features/bookDetails/ui/screens/widgets/ebook_reader_sc
 import 'package:book_app/features/bookDetails/ui/screens/widgets/progress_bar.dart';
 import 'package:book_app/features/home/data/models/book_model.dart';
 import 'package:book_app/features/bookDetails/ui/screens/widgets/custom_description.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -135,9 +136,9 @@ class BookDetails extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Column(
                     children: [
-                      Text(book.volumeInfo?.title ?? 'No Title', style: TextStyle(
+                      Text(book.volumeInfo?.title ?? 'No Title'.tr(), style: TextStyle(
                           fontSize: 20.sp, fontWeight: FontWeight.bold,)),
-                      Text(book.volumeInfo?.authors?.join(', ') ?? 'Unknown Author',
+                      Text(book.volumeInfo?.authors?.join(', ').tr() ?? 'Unknown Author'.tr(),
                           style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w500,
@@ -151,7 +152,7 @@ class BookDetails extends StatelessWidget {
                         children: [
                           CustomRatingStars(rating: book.volumeInfo?.averageRating ?? 0),
                           SizedBox(width: 5.w,),
-                          Text("${book.volumeInfo?.averageRating ?? '0'}"),
+                          Text("${book.volumeInfo?.averageRating ?? '0'}".tr()),
                           // SizedBox(width: 4.w),
                           // Text("(${book.volumeInfo?.ratingsCount ?? '0'} reviews)"),
                         ],
@@ -197,7 +198,7 @@ class BookDetails extends StatelessWidget {
                               Icon(Icons.phone_iphone,color: AppColor.primaryColor,),
                               SizedBox(width: 8.w),
                               Text(
-                                isEbookAvailable ? 'Available as eBook' : 'Not available as eBook',
+                                isEbookAvailable ? 'Available as eBook'.tr() : 'Not available as eBook'.tr(),
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w500,
@@ -272,7 +273,7 @@ class BookDetails extends StatelessWidget {
                         children: [
                           Expanded(
                             child: CustButton(
-                              text: "Want to Read",
+                              text: "Want to Read".tr(),
                               textColor: AppColor.black,
                               iconData: CupertinoIcons.bookmark,
                               iconColor: AppColor.black,
@@ -290,7 +291,7 @@ class BookDetails extends StatelessWidget {
                           SizedBox(width: 5.w,),
                           Expanded(
                             child: CustButton(
-                              text: "Currently Reading",
+                              text: "Currently Reading".tr(),
                               textColor: AppColor.black,
                               textStyle: TextStyle(fontSize: 12.sp,fontWeight: FontWeight.w900,color: AppColor.black),
                               iconData: CupertinoIcons.book,
@@ -317,7 +318,7 @@ class BookDetails extends StatelessWidget {
                           SizedBox(width: 5.w,),
                           Expanded(
                             child: CustButton(
-                              text: "Finished",
+                              text: "Finished".tr(),
                               textColor: AppColor.black,
                               //textStyle: TextStyle(fontSize: 12.sp,fontWeight: FontWeight.w900),
                               iconData: CupertinoIcons.checkmark,
@@ -395,7 +396,7 @@ class BookDetails extends StatelessWidget {
                       SizedBox(height: 12.h,),
                       // Add to List button
                       CustButton(
-                        text: "Add to List",
+                        text: "Add to List".tr(),
                         iconData: CupertinoIcons.plus,
                         onPressed: () => _showAddToListBottomSheet(context, book),
                         hasBorder: true,
@@ -429,24 +430,24 @@ class BookDetails extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("About this book", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22.sp)),
+                      Text("About this book".tr(), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22.sp)),
                       SizedBox(height: 12.h),
                       Text(
-                        book.volumeInfo?.description ?? 'No Description',
+                        book.volumeInfo?.description?.tr() ?? 'No Description'.tr(),
                         style: TextStyle(
                             fontSize: 16.sp, color: Colors.black54),
                         textAlign: TextAlign.justify,
                       ),
                       SizedBox(height: 12.h),
-                      CustomDescription(text1: "Pages", text2: book.volumeInfo?.pageCount ?.toString() ?? 'Unknown'),
+                      CustomDescription(text1: "Pages".tr(), text2: book.volumeInfo?.pageCount ?.toString().tr() ?? 'Unknown'.tr()),
                       SizedBox(height: 12.h),
-                      CustomDescription(text1: "Published", text2: book.volumeInfo?.publishedDate ?? 'Unknown'),
+                      CustomDescription(text1: "Published".tr(), text2: book.volumeInfo?.publishedDate?.tr() ?? 'Unknown'.tr()),
                       SizedBox(height: 12.h),
-                      CustomDescription(text1: "Publisher", text2: book.volumeInfo?.publisher ?? 'Unknown'),
+                      CustomDescription(text1: "Publisher".tr(), text2: book.volumeInfo?.publisher?.tr() ?? 'Unknown'.tr()),
                       SizedBox(height: 12.h),
-                      CustomDescription(text1: "Genre", text2: book.volumeInfo?.categories?.first ?? 'Unknown'),
+                      CustomDescription(text1: "Genre".tr(), text2: book.volumeInfo?.categories?.first.tr() ?? 'Unknown'.tr()),
                       SizedBox(height: 12.h,),
-                      CustomButton(text: "More Details", onPressed: (){_showBookDetails(context);},iconData: CupertinoIcons.info,backgroundColor: Colors.grey[300],textColor: AppColor.primaryColor,iconColor: AppColor.primaryColor,),
+                      CustomButton(text: "More Details".tr(), onPressed: (){_showBookDetails(context);},iconData: CupertinoIcons.info,backgroundColor: Colors.grey[300],textColor: AppColor.primaryColor,iconColor: AppColor.primaryColor,),
                     ],
                   ),
                 ),
@@ -637,7 +638,7 @@ class BookDetails extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text("Book Details",
+                  Text("Book Details".tr(),
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22.sp),),
                   Spacer(),
                   IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(CupertinoIcons.xmark))
@@ -645,19 +646,19 @@ class BookDetails extends StatelessWidget {
               ),
               Divider(thickness: 4,color: Colors.grey[300]),
               SizedBox(height: 16.h),
-              CustomDescription(text1: "Title", text2: book.volumeInfo?.title ?? 'No Title'),
+              CustomDescription(text1: "Title".tr(), text2: book.volumeInfo?.title?.tr() ?? 'No Title'.tr()),
               SizedBox(height: 16.h,),
-              CustomDescription(text1: "Author", text2: book.volumeInfo?.authors?.join(', ') ?? 'Unknown'),
+              CustomDescription(text1: "Author".tr(), text2: book.volumeInfo?.authors?.join(', ').tr() ?? 'Unknown'.tr()),
               SizedBox(height: 16.h,),
-              CustomDescription(text1: "ISBN", text2: isbn13 ?? isbn ?? 'No ISBN'),
+              CustomDescription(text1: "ISBN".tr(), text2: isbn13?.tr() ?? isbn?.tr() ?? 'No ISBN'.tr()),
               SizedBox(height: 16.h,),
-              CustomDescription(text1: "Publisher", text2: book.volumeInfo?.publisher ?? 'No publisher'),
+              CustomDescription(text1: "Publisher".tr(), text2: book.volumeInfo?.publisher?.tr() ?? 'No publisher'.tr()),
               SizedBox(height: 16.h,),
-              CustomDescription(text1: "Published Date", text2: book.volumeInfo?.publishedDate ?? 'No published date'),
+              CustomDescription(text1: "Published Date".tr(), text2: book.volumeInfo?.publishedDate?.tr() ?? 'No published date'.tr()),
               SizedBox(height: 16.h,),
-              CustomDescription(text1: "Page Count", text2: book.volumeInfo?.pageCount?.toString() ?? 'No page count'),
+              CustomDescription(text1: "Page Count".tr(), text2: book.volumeInfo?.pageCount?.toString().tr() ?? 'No page count'.tr()),
               SizedBox(height: 16.h,),
-              CustomDescription(text1: "Language", text2: book.volumeInfo?.language ?? 'No language'),
+              CustomDescription(text1: "Language".tr(), text2: book.volumeInfo?.language?.tr() ?? 'No language'.tr()),
               SizedBox(height: 16.h,),
               // ElevatedButton(
               //   onPressed: () => Navigator.pop(context),
@@ -743,7 +744,7 @@ class BookDetails extends StatelessWidget {
           children: [
             Expanded(
               child: CustButton(
-                text: "Read Now",
+                text: "Read Now".tr(),
                 onPressed: () => _handleReadNow(context, bookId),
                 iconData: CupertinoIcons.book,
                 margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -756,7 +757,7 @@ class BookDetails extends StatelessWidget {
             SizedBox(width: 20.w),
             Expanded(
               child: CustButton(
-                text: "Download",
+                text: "Download".tr(),
                 onPressed: () => _handleDownload(context, bookId, downloadUrl),
                 iconData: Icons.download_sharp,
                 margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -777,14 +778,14 @@ class BookDetails extends StatelessWidget {
     ebookCubit.resetState(); // Clear previous state
     ebookCubit.checkEbookAccess(bookId);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Refreshing eBook access...')),
+      SnackBar(content: Text('Refreshing eBook access...'.tr())),
     );
   }
 
 // Call this after purchase completes
   Widget _buildPurchaseButton(BuildContext context, String bookId, double price) {
     return CustButton(
-      text: "Purchase (\$${price.toStringAsFixed(2)})",
+      text: "Purchase (\$${price.toStringAsFixed(2)})".tr(),
       onPressed: () async {
         final ebookCubit = context.read<EBookCubit>();
 
@@ -799,7 +800,7 @@ class BookDetails extends StatelessWidget {
 
         } catch (e) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Purchase failed: $e')),
+            SnackBar(content: Text('Purchase failed: $e').tr()),
           );
         }
       },
@@ -824,7 +825,7 @@ class BookDetails extends StatelessWidget {
 
   Widget _buildCheckAccessButton(BuildContext context, String bookId) {
     return CustButton(
-      text: "Check Access",
+      text: "Check Access".tr(),
       onPressed: () => context.read<EBookCubit>().checkEbookAccess(bookId),
       iconData: Icons.refresh,
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -853,20 +854,20 @@ class BookDetails extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => EBookReaderScreen(
-              bookTitle: book.volumeInfo?.title ?? 'E-Book',
+              bookTitle: book.volumeInfo?.title?.tr() ?? 'E-Book'.tr(),
               bookContent: bookContent,
             ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(bookContent['message'])),
+          SnackBar(content: Text(bookContent['message'].tr())),
         );
       }
     } catch (e) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load book: $e')),
+        SnackBar(content: Text('Failed to load book: $e'.tr())),
       );
     }
   }
@@ -875,7 +876,7 @@ class BookDetails extends StatelessWidget {
       context.read<EBookCubit>().openEbook(bookId, customUrl: downloadUrl);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No download URL available')),
+        SnackBar(content: Text('No download URL available'.tr())),
       );
     }
   }
@@ -889,7 +890,7 @@ class BookDetails extends StatelessWidget {
           children: [
             // Read Now button
             CustButton(
-              text: "Read Now",
+              text: "Read Now".tr(),
               onPressed: () => _handleReadNow(context, bookId),
               iconData: CupertinoIcons.book,
               margin: EdgeInsets.symmetric(vertical: 8.h),
@@ -910,7 +911,7 @@ class BookDetails extends StatelessWidget {
       }
     } else if (state is EBookError) {
       return Text(
-        state.message,
+        state.message.tr(),
         style: TextStyle(color: Colors.red),
       );
     } else {
@@ -933,12 +934,12 @@ class BookDetails extends StatelessWidget {
         if (state.isEpubAvailable)
           PopupMenuItem(
             value: 'epub',
-            child: Text('Download EPUB'),
+            child: Text('Download EPUB'.tr()),
           ),
         if (state.isPdfAvailable)
           PopupMenuItem(
             value: 'pdf',
-            child: Text('Download PDF'),
+            child: Text('Download PDF'.tr()),
           ),
       ],
       child: Container(
@@ -952,7 +953,7 @@ class BookDetails extends StatelessWidget {
           children: [
             Icon(Icons.download, size: 20.w),
             SizedBox(width: 8.w),
-            Text('Download Options', style: TextStyle(fontSize: 14.sp)),
+            Text('Download Options'.tr(), style: TextStyle(fontSize: 14.sp)),
           ],
         ),
       ),
@@ -964,7 +965,7 @@ class BookDetails extends StatelessWidget {
       await launchUrlString(url);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cannot open URL')),
+        SnackBar(content: Text('Cannot open URL'.tr())),
       );
     }
   }

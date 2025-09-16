@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,7 +22,7 @@ class SearchScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Search Books"),
+          title: Text("Search Books".tr()),
       ),
       body: Padding(
         padding: EdgeInsets.all(12.w),
@@ -31,7 +32,7 @@ class SearchScreen extends StatelessWidget {
             TextField(
               onChanged: (text) => query.value = text,
               decoration: InputDecoration(
-                hintText: "Search by title, author, or genre...",
+                hintText: "Search by title, author, or genre...".tr(),
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -77,7 +78,7 @@ class SearchScreen extends StatelessWidget {
                       if (filteredBooks.isEmpty) {
                         return Center(
                           child: Text(
-                            "No books found",
+                            "No books found".tr(),
                             style: TextStyle(color: Colors.grey, fontSize: 16.sp),
                           ),
                         );

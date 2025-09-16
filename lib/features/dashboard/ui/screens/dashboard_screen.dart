@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:book_app/features/dashboard/ui/screens/widgets/reading_activity_chart.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,7 +38,7 @@ class DashboardScreen extends StatelessWidget {
           if (state is DashboardLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is DashboardError) {
-            return Center(child: Text("Error: ${state.message}"));
+            return Center(child: Text("Error: ${state.message}".tr()));
           } else if (state is DashboardSuccess) {
             final progress = state.goal > 0
                 ? state.finishedBooks / state.goal
@@ -49,15 +50,15 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Your Reading Dashboard",
+                    Text("Your Reading Dashboard".tr(),
                         style: TextStyle(
                             fontSize: 24.sp, fontWeight: FontWeight.bold)),
                     SizedBox(height: 20.h),
-                    Text("Track your reading progress and stats here.",
+                    Text("Track your reading progress and stats here.".tr(),
                         style: TextStyle(
                             fontSize: 16.sp, color: AppColor.textGray)),
                     SizedBox(height: 20.h),
-              
+
                     // 📊 Stats card
                     Container(
                       width: double.infinity,
@@ -79,20 +80,20 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text("2025 Reading Goal",
+                              Text("2025 Reading Goal".tr(),
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 20.sp)),
                               const Spacer(),
                               Text(
-                                "${state.finishedBooks}/${state.goal} books",
+                                "${state.finishedBooks}/${state.goal} ${"books"}".tr(),
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
                                   color: AppColor.primaryColor,
                                 ),
                               ),
-              
+
                             ],
                           ),
                           SizedBox(height: 12.h),
@@ -114,20 +115,25 @@ class DashboardScreen extends StatelessWidget {
                                   final newGoal = await showDialog<int>(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      title: Text("Set Reading Goal"),
+                                      title: Text("Set Reading Goal".tr()),
                                       content: TextField(
                                         controller: controller,
                                         keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(hintText: "Enter goal for ${DateTime.now().year}"),
+                                        decoration: InputDecoration(
+                                            hintText: "${"Enter goal for"} ${DateTime.now().year}".tr()
+                                        ),
                                       ),
                                       actions: [
-                                        TextButton(onPressed: () => Navigator.pop(context), child: Text("Cancel")),
+                                        TextButton(
+                                            onPressed: () => Navigator.pop(context),
+                                            child: Text("Cancel".tr())
+                                        ),
                                         ElevatedButton(
                                           onPressed: () {
                                             final val = int.tryParse(controller.text);
                                             Navigator.pop(context, val);
                                           },
-                                          child: Text("Save"),
+                                          child: Text("Save".tr()),
                                         ),
                                       ],
                                     ),
@@ -140,7 +146,7 @@ class DashboardScreen extends StatelessWidget {
                               ),
                               Spacer(),
                               Text(
-                                  "${progress*100} %",
+                                  "${(progress*100).toStringAsFixed(1)}%".tr(),
                                   style: TextStyle(
                                       fontSize: 20.sp,
                                       color: AppColor.primaryColor ,
@@ -150,7 +156,7 @@ class DashboardScreen extends StatelessWidget {
                             ],
                           ),
                           SizedBox(height: 20.h),
-                          Text("Keep going! You're making great progress.",
+                          Text("Keep going! You're making great progress.".tr(),
                               style: TextStyle(
                                   fontSize: 16.sp, color: AppColor.textGray,fontWeight: FontWeight.bold)),
                         ],
@@ -195,10 +201,10 @@ class DashboardScreen extends StatelessWidget {
                               children: [
                                 Icon(Icons.search, size: 40.h, color: Colors.blue),
                                 SizedBox(height: 8.h),
-                                Text("Find Books", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                                Text("Find Books".tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
                               ],
                             ),
-              
+
                           ),
                         ),
                         SizedBox(width: 10.w),
@@ -221,10 +227,10 @@ class DashboardScreen extends StatelessWidget {
                               children: [
                                 Icon(Icons.emoji_events_sharp, size: 40.h, color: Colors.amber),
                                 SizedBox(height: 8.h),
-                                Text("Achievements", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                                Text("Achievements".tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
                               ],
                             ),
-              
+
                           ),
                         ),
                         SizedBox(width: 10.w,),
@@ -249,7 +255,7 @@ class DashboardScreen extends StatelessWidget {
                               children: [
                                 Icon(Icons.bookmark_outline, size: 40.h, color: AppColor.primaryColor),
                                 SizedBox(height: 8.h),
-                                Text("My  Library", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
+                                Text("My Library".tr(), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
                               ],
                             ),
                           ),
@@ -278,8 +284,8 @@ class DashboardScreen extends StatelessWidget {
                               children: [
                                 Column(
                                   children: [
-                                    Text('${state.currentlyReading}', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),),
-                                    Text("Currently \n Reading", style: TextStyle(fontSize: 14.sp), textAlign: TextAlign.center,),
+                                    Text('${state.currentlyReading}'.tr(), style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),),
+                                    Text("Currently Reading".tr(), style: TextStyle(fontSize: 14.sp), textAlign: TextAlign.center,),
                                   ],
                                 ),
                                 Spacer(),
@@ -308,8 +314,8 @@ class DashboardScreen extends StatelessWidget {
                               children: [
                                 Column(
                                   children: [
-                                    Text('${state.finishedBooks}', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),),
-                                    Text("Books Read", style: TextStyle(fontSize: 14.sp), textAlign: TextAlign.center,),
+                                    Text('${state.finishedBooks}'.tr(), style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),),
+                                    Text("Books Read".tr(), style: TextStyle(fontSize: 14.sp), textAlign: TextAlign.center,),
                                   ],
                                 ),
                                 Spacer(),
@@ -341,8 +347,8 @@ class DashboardScreen extends StatelessWidget {
                               children: [
                                 Column(
                                   children: [
-                                    Text('${state.totalPagesRead}', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),),
-                                    Text("Pages Read", style: TextStyle(fontSize: 14.sp), textAlign: TextAlign.center,),
+                                    Text('${state.totalPagesRead}'.tr(), style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),),
+                                    Text("Pages Read".tr(), style: TextStyle(fontSize: 14.sp), textAlign: TextAlign.center,),
                                   ],
                                 ),
                                 Spacer(),
@@ -370,8 +376,8 @@ class DashboardScreen extends StatelessWidget {
                               children: [
                                 Column(
                                   children: [
-                                    Text('${state.currentStreak}', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),),
-                                    Text("Day Streak", style: TextStyle(fontSize: 14.sp), textAlign: TextAlign.center,),
+                                    Text('${state.currentStreak}'.tr(), style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),),
+                                    Text("Day Streak".tr(), style: TextStyle(fontSize: 14.sp), textAlign: TextAlign.center,),
                                   ],
                                 ),
                                 Spacer(),
@@ -406,7 +412,7 @@ class DashboardScreen extends StatelessWidget {
                           Padding(
                             padding: EdgeInsets.all(16.w),
                             child: Text(
-                              "Reading Activity",
+                              "Reading Activity".tr(),
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
@@ -431,17 +437,17 @@ class DashboardScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Currently Reading",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20.sp),),
+                          Text("Currently Reading".tr(),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20.sp),),
                           SizedBox(height: 10.h),
                           if (state.books.where((b) => b.status == 'reading').isEmpty)
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20.h),
-                            child: Text(
-                              "No books currently being read",
-                              style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20.h),
+                              child: Text(
+                                "No books currently being read".tr(),
+                                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
                           else
                             ListView.separated(
                               physics: NeverScrollableScrollPhysics(), // Disable scrolling within ListView
@@ -490,27 +496,27 @@ class DashboardScreen extends StatelessWidget {
                                           SizedBox(width: 12.w),
                                           Expanded(
                                             child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                book.bookDetails.volumeInfo?.title ?? 'Untitled',
-                                                style: TextStyle(
-                                                  fontSize: 16.sp, fontWeight: FontWeight.bold
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  book.bookDetails.volumeInfo?.title?.tr() ?? 'Untitled'.tr(),
+                                                  style: TextStyle(
+                                                      fontSize: 16.sp, fontWeight: FontWeight.bold
+                                                  ),
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              SizedBox(height: 4.h),
-                                              Text(
-                                                book.bookDetails.volumeInfo?.authors?.join(', ') ??
-                                                'Unknown Author',
-                                                style: TextStyle(
-                                                  fontSize: 14.sp, color: Colors.grey[600]),
+                                                SizedBox(height: 4.h),
+                                                Text(
+                                                  book.bookDetails.volumeInfo?.authors?.join(', ').tr() ??
+                                                      'Unknown Author'.tr(),
+                                                  style: TextStyle(
+                                                      fontSize: 14.sp, color: Colors.grey[600]),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -546,7 +552,7 @@ class DashboardScreen extends StatelessWidget {
                                               ),
                                               SizedBox(width: 8.w),
                                               Text(
-                                                "${(book.progress != null ? (book.progress! * 100) : 0).toStringAsFixed(1)}%",
+                                                "${(book.progress != null ? (book.progress! * 100) : 0).toStringAsFixed(1)}%".tr(),
                                                 style: TextStyle(
                                                   fontSize: 12.sp,
                                                   color: AppColor.primaryColor,

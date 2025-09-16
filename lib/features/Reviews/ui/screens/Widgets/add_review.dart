@@ -1,4 +1,5 @@
 import 'package:book_app/features/Reviews/ui/cubit/review_cubit.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,13 +23,13 @@ class AddReviewBottomSheetContent extends StatelessWidget {
       print('Submitting review for book: $bookId');
       if (rating == 0.0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please select a rating")),
+          SnackBar(content: Text("Please select a rating".tr())),
         );
         return;
       }
       if (commentController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please write a review")),
+          SnackBar(content: Text("Please write a review".tr())),
         );
         return;
       }
@@ -44,11 +45,11 @@ class AddReviewBottomSheetContent extends StatelessWidget {
         );
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Review submitted successfully!"))
+            SnackBar(content: Text("Review submitted successfully!".tr()))
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to submit review: $e"))
+            SnackBar(content: Text("Failed to submit review: $e".tr()))
         );
       } finally {
         setState(() {
@@ -72,7 +73,7 @@ class AddReviewBottomSheetContent extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text("Add Review", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                    Text("Add Review".tr(), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
                     Spacer(),
                     IconButton(
                         onPressed: () => Navigator.pop(context),
@@ -82,7 +83,7 @@ class AddReviewBottomSheetContent extends StatelessWidget {
                 ),
                 SizedBox(height: 20.h),
                 Center(
-                  child: Text("Your rating", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp)),
+                  child: Text("Your rating".tr(), style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp)),
                 ),
                 SizedBox(height: 16.h), // Changed from .sp to .h for consistency
                 Center(
@@ -106,7 +107,7 @@ class AddReviewBottomSheetContent extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 Text(
-                  "Your Review",
+                  "Your Review".tr(),
                   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
                 ),
                 SizedBox(height: 8.h),
@@ -114,7 +115,7 @@ class AddReviewBottomSheetContent extends StatelessWidget {
                   controller: commentController,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText: "Share your thoughts about this book...",
+                    hintText: "Share your thoughts about this book...".tr(),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -131,7 +132,7 @@ class AddReviewBottomSheetContent extends StatelessWidget {
                     child: isSubmitting
                         ? CupertinoActivityIndicator(color: Colors.white)
                         : Text(
-                      "Submit Review",
+                      "Submit Review".tr(),
                       style: TextStyle(fontSize: 16.sp, color: Colors.white),
                     ),
                   ),

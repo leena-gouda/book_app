@@ -1,4 +1,5 @@
 // features/reviews/ui/screens/Widgets/review_card.dart
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -129,7 +130,7 @@ class ReviewCard extends StatelessWidget {
               ),
               if (bookAuthors != null && bookAuthors!.isNotEmpty)
                 Text(
-                  bookAuthors!.join(', '),
+                  bookAuthors!.join(', ').tr(),
                   style: TextStyle(fontSize: 14.sp, color: Colors.grey),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

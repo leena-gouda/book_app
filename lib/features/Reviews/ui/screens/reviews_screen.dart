@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,7 +19,7 @@ class AllReviewsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('All Reviews (${reviews.length})'),
+        title: Text('All Reviews (${reviews.length})'.tr()),
       ),
       body: ListView.separated(
         padding: EdgeInsets.all(16.w),

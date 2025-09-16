@@ -1,4 +1,5 @@
 // features/reviews/ui/screens/user_reviews_screen.dart
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +15,7 @@ class UserReviewsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Reviews'),
+        title:  Text('My Reviews'.tr()),
       ),
       body: BlocBuilder<UserReviewsCubit, UserReviewsState>(
         builder: (context, state) {
@@ -23,14 +24,14 @@ class UserReviewsScreen extends StatelessWidget {
           }
 
           if (state is UserReviewsError) {
-            return Center(child: Text(state.message));
+            return Center(child: Text(state.message.tr()));
           }
 
           if (state is UserReviewsLoaded) {
             return _buildReviewsList(context, state.reviews);
           }
 
-          return const Center(child: Text('No reviews yet'));
+          return Center(child: Text('No reviews yet'.tr()));
         },
       ),
     );
@@ -45,12 +46,12 @@ class UserReviewsScreen extends StatelessWidget {
             Icon(Icons.reviews, size: 64.w, color: Colors.grey),
             SizedBox(height: 16.h),
             Text(
-              'No reviews yet',
+              'No reviews yet'.tr(),
               style: TextStyle(fontSize: 18.sp, color: Colors.grey),
             ),
             SizedBox(height: 8.h),
             Text(
-              'Start reviewing books to see them here!',
+              'Start reviewing books to see them here!'.tr(),
               style: TextStyle(fontSize: 14.sp, color: Colors.grey),
             ),
           ],
@@ -69,9 +70,8 @@ class UserReviewsScreen extends StatelessWidget {
         return ReviewCard(
           review: review,
           showBookInfo: true,
-          bookTitle: book['title'] ?? 'Unknown Book',
-          bookAuthors: (book['authors'] as List<dynamic>?)?.cast<String>() ?? [],
-          bookThumbnail: book['thumbnail_url'],
+          bookTitle: book['title'].tr() ?? 'Unknown Book'.tr(),
+          bookThumbnail: book['thumbnail_url'].tr(),
         );
       },
     );

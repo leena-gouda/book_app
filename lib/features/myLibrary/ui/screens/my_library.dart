@@ -3,6 +3,7 @@ import 'package:book_app/features/bookLists/ui/screens/widgets/list_gridview.dar
 import 'package:book_app/features/myLibrary/data/models/user_book_model.dart';
 import 'package:book_app/features/myLibrary/ui/screens/widgets/grid_view.dart';
 import 'package:book_app/features/myLibrary/ui/screens/widgets/small_buttons.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -39,9 +40,9 @@ class MyLibrary extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 16.h),
-              Text('My Library', style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.bold)),
+              Text('My Library'.tr(), style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.bold)),
               SizedBox(height: 8.h),
-              Text("Organize and track your reading collection",
+              Text("Organize and track your reading collection".tr(),
                   style: TextStyle(fontSize: 16.sp, color: Colors.grey, fontWeight: FontWeight.bold)),
               SizedBox(height: 24.h),
 
@@ -80,8 +81,8 @@ class MyLibrary extends StatelessWidget {
                                   return Padding(
                                     padding: EdgeInsets.only(right: 8.w),
                                     child: SmallButtons(
-                                      text: status,
-                                      circleText: count.toString(),
+                                      text: status.tr(),
+                                      circleText: count.toString().tr(),
                                       circleTextColor: Colors.black,
                                       hasBorder: true,
                                       width: 120.w,
@@ -102,7 +103,7 @@ class MyLibrary extends StatelessWidget {
 
                             // Only show "Reading Progress" title for Reading section
                             if (selectedStatus == 'Reading')
-                              Text("Reading Progress", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                              Text("Reading Progress".tr(), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
 
                             SizedBox(height: selectedStatus == 'Reading' ? 16.h : 0),
 
@@ -132,7 +133,7 @@ class MyLibrary extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         if (state is ListError) {
-          return Center(child: Text('Error: ${state.message}'));
+          return Center(child: Text('Error: ${state.message}'.tr()));
         }
         if (state is ListLoaded) {
           final lists = state.lists;
@@ -143,14 +144,14 @@ class MyLibrary extends StatelessWidget {
                 children: [
                   Icon(Icons.list_alt, size: 64, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text('No lists yet', style: TextStyle(fontSize: 16)),
+                  Text('No lists yet'.tr(), style: TextStyle(fontSize: 16)),
                   SizedBox(height: 8),
-                  Text('Create your first list to organize books',
+                  Text('Create your first list to organize books'.tr(),
                       style: TextStyle(fontSize: 14, color: Colors.grey)),
                   SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => showCreateListDialog(context),
-                    child: Text('Create New List'),
+                    child: Text('Create New List'.tr()),
                   ),
                 ],
               ),
@@ -179,7 +180,7 @@ class MyLibrary extends StatelessWidget {
               .toList();
 
           if (books.isEmpty) {
-            return Center(child: Text("No books found"));
+            return Center(child: Text("No books found".tr()));
           }
 
           // Special layout for "Reading" status with progress bars
@@ -231,7 +232,7 @@ class MyLibrary extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  book.bookDetails.volumeInfo?.title ?? 'Untitled',
+                                  book.bookDetails.volumeInfo?.title?.tr() ?? 'Untitled'.tr(),
                                   style: TextStyle(
                                       fontSize: 16.sp, fontWeight: FontWeight.bold),
                                   maxLines: 2,
@@ -239,8 +240,8 @@ class MyLibrary extends StatelessWidget {
                                 ),
                                 SizedBox(height: 4.h),
                                 Text(
-                                  book.bookDetails.volumeInfo?.authors?.join(', ') ??
-                                      'Unknown Author',
+                                  book.bookDetails.volumeInfo?.authors?.join(', ').tr() ??
+                                      'Unknown Author'.tr(),
                                   style: TextStyle(
                                       fontSize: 14.sp, color: Colors.grey[600]),
                                   maxLines: 1,
@@ -272,7 +273,7 @@ class MyLibrary extends StatelessWidget {
           // Grid view for other statuses
           return BookGridView(books: books);
         } else if (state is LibraryError) {
-          return Center(child: Text("Error: ${state.message}"));
+          return Center(child: Text("Error: ${state.message}".tr()));
         }
         return Container();
       },

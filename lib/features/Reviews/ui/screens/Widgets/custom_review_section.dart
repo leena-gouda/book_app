@@ -1,4 +1,5 @@
 import 'package:book_app/features/Reviews/ui/screens/Widgets/review_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,7 +37,7 @@ class CustomReviewSection extends StatelessWidget {
             if (snapshot.hasError) {
               return Center(
                 child: Text(
-                  'Error loading reviews',
+                  'Error loading reviews'.tr(),
                   style: TextStyle(
                     color: Colors.red,
                     fontSize: 14.sp,
@@ -59,21 +60,21 @@ class CustomReviewSection extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Reviews',
+                        'Reviews'.tr(),
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Spacer(),
-                      CustButton(text: "Add Review", onPressed:() => _addReview(context), margin: EdgeInsets.symmetric(),backgroundColor: AppColor.primaryColor,borderRadius: 12.r,height: 30.h,iconData: CupertinoIcons.plus,iconColor: AppColor.white,),
+                      CustButton(text: "Add Review".tr(), onPressed:() => _addReview(context), margin: EdgeInsets.symmetric(),backgroundColor: AppColor.primaryColor,borderRadius: 12.r,height: 30.h,iconData: CupertinoIcons.plus,iconColor: AppColor.white,),
                       if (reviews.isNotEmpty)
                         CupertinoButton(
                           padding: EdgeInsets.zero,
                           minSize: 0,
                           onPressed: () => _navigateToAllReviews(context, reviews),
                           child: Text(
-                            'See All (${reviews.length})',
+                            'See All (${reviews.length})'.tr(),
                             style: TextStyle(
                               fontSize: 14.sp,
                               color: Colors.blue,
@@ -87,7 +88,7 @@ class CustomReviewSection extends StatelessWidget {
                 if (reviews.isEmpty)
                   Center(
                     child: Text(
-                      'No reviews yet',
+                      'No reviews yet'.tr(),
                       style: TextStyle(
                         fontSize: 16.sp,
                         color: Colors.grey,
@@ -112,7 +113,7 @@ class CustomReviewSection extends StatelessWidget {
                     child: CupertinoButton(
                       onPressed: () => _navigateToAllReviews(context, reviews),
                       child: Text(
-                        'See More Reviews',
+                        'See More Reviews'.tr(),
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: Colors.blue,

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:book_app/features/profile/ui/screens/widgets/avatar_selection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,19 +9,62 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/routing/routes.dart';
 import '../../data/repos/profile_repo.dart';
 import '../cubit/profile_cubit.dart';
+import '../cubit/theme_cubit.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    String isArabic(String ar, String en) {
+      if (context.locale.languageCode == 'ar') {
+        return ar;
+      } else {
+        return en;
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text('Profile'.tr()),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.settings),
-            onPressed: () {},
+            onSelected: (value) {
+              if (value == 'language') {
+                _showLanguageDialog(context);
+              }
+              else if (value == 'dark_mode') {
+                context.read<ThemeCubit>().toggleTheme();
+              }},
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem<String>(
+                  value: 'language',
+                  child: ListTile(
+                    leading: Icon(Icons.language),
+                    title: Text('Change Language'.tr()),
+                  ),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                  value: 'dark_mode',
+                  child: Row(
+                    children: [
+                      Text('Dark Mode'.tr()),
+                      BlocBuilder<ThemeCubit, ThemeMode>(
+                        builder: (context, themeMode) {
+                          return Switch(
+                            value: themeMode == ThemeMode.dark,
+                            onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                ),
+              ];
+            },
           ),
         ],
       ),
@@ -32,8 +76,8 @@ class ProfileScreen extends StatelessWidget {
               barrierDismissible: false,
               builder: (context) {
                 return AlertDialog(
-                  title: const Text('Logged Out'),
-                  content: const Text('Do you want to login again or create a new account?'),
+                  title:  Text('Logged Out'.tr()),
+                  content:  Text('Do you want to login again or create a new account?'.tr()),
                   actions: [
                     TextButton(
                       onPressed: () {
@@ -44,7 +88,7 @@ class ProfileScreen extends StatelessWidget {
                               (route) => false,
                         );
                       },
-                      child: const Text('Login'),
+                      child: Text('Login'.tr()),
                     ),
                     TextButton(
                       onPressed: () {
@@ -55,7 +99,7 @@ class ProfileScreen extends StatelessWidget {
                               (route) => false,
                         );
                       },
-                      child: const Text('Sign Up'),
+                      child: Text('Sign Up'.tr()),
                     ),
                   ],
                 );
@@ -88,28 +132,79 @@ class ProfileScreen extends StatelessWidget {
           }
 
           if (state is ProfileError) {
-            return Center(child: Text(state.message));
+            return Center(child: Text(state.message.tr()));
           }
 
           if (state is ProfileLoaded) {
-            return _buildProfileContent(context, state);
+            _debugTranslations(context);
+          return _buildProfileContent(context, state);
           }
 
           if (state is ProfileAvatarsLoaded) {
-            // Just show profile content normally, dialog is already handled in listener
+            _debugTranslations(context);
+          // Just show profile content normally, dialog is already handled in listener
             return _buildProfileContent(
               context,
               ProfileLoaded(profile: state.profile, stats: state.stats),
             );
           }
 
-          return const Center(child: Text('No profile data'));
+          return Center(child: Text('No profile data'.tr()));
         },
       ),
 
     );
   }
+  void _changeLanguage(BuildContext context) async {
+    final currentLocale = context.locale;
+    final newLocale = currentLocale.languageCode == 'en' ? Locale('ar') : Locale('en');
 
+    await context.setLocale(newLocale);
+
+    // Force a complete rebuild by navigating to a new instance
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfileScreen(key: UniqueKey()),
+      ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('select_language'.tr()),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: Text('english'.tr()),
+                onTap: () {
+                  if (context.locale.languageCode != 'en') {
+                    _changeLanguage(context);
+                  }
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: Text('arabic'.tr()),
+                onTap: () {
+                  if (context.locale.languageCode != 'ar') {
+                    _changeLanguage(context);
+                  }
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
   Widget _buildProfileContent(BuildContext context, ProfileLoaded state) {
     final profile = state.profile;
     final stats = state.stats;
@@ -131,9 +226,17 @@ class ProfileScreen extends StatelessWidget {
 
           // Profile Actions
           _buildProfileActions(context, cubit),
+
         ],
       ),
     );
+  }
+
+  void _debugTranslations(BuildContext context) {
+    print('Current locale: ${context.locale}');
+    print('Supported locales: ${context.supportedLocales}');
+    print('Profile translation: ${'profile'.tr()}');
+    print('Change language translation: ${'change_language'.tr()}');
   }
 
   Widget _buildProfileHeader(BuildContext context, Map<String, dynamic>? profile, ProfileCubit cubit) {
@@ -185,7 +288,7 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: () => _editProfile(context, profile, cubit),
-          child: const Text('Edit Profile'),
+          child: Text('Edit Profile'.tr()),
         ),
       ],
     );
@@ -211,7 +314,7 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text('Reading Stats', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('Reading Stats'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -243,14 +346,14 @@ class ProfileScreen extends StatelessWidget {
       children: [
         ListTile(
           leading: const Icon(Icons.library_books),
-          title: const Text('My Library'),
+          title: Text('My Library'.tr()),
           onTap: () {
             Navigator.pushNamed(context, Routes.myLibraryScreen);
           },
         ),
         ListTile(
           leading: const Icon(Icons.star),
-          title: const Text('My Reviews'),
+          title: Text('My Reviews'.tr()),
           onTap: () {
             Navigator.pushNamed(context, Routes.userReviewScreen);
           },
@@ -258,7 +361,7 @@ class ProfileScreen extends StatelessWidget {
         const Divider(),
         ListTile(
           leading: const Icon(Icons.logout, color: Colors.red),
-          title: const Text('Logout', style: TextStyle(color: Colors.red)),
+          title:  Text('Logout'.tr(), style: TextStyle(color: Colors.red)),
           onTap: () => _showLogoutDialog(context, cubit),
         ),
       ],
@@ -353,7 +456,7 @@ class ProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Profile'),
+        title:  Text('Edit Profile'.tr()),
         content: EditProfileForm(profile: profile, cubit: cubit),
       ),
     );
@@ -363,19 +466,19 @@ class ProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title:  Text('Logout'.tr()),
+        content:  Text('Are you sure you want to logout?'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               cubit.logout();
             },
-            child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            child: Text('Logout'.tr(), style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -437,7 +540,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _saveProfile,
-            child: const Text('Save Changes'),
+            child: Text('Save Changes'.tr()),
           ),
         ],
       ),

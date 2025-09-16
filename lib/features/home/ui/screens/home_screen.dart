@@ -15,6 +15,7 @@ import 'package:book_app/features/home/ui/screens/widgets/custom_home_subtitle.d
 import 'package:book_app/features/home/ui/screens/widgets/custom_home_title.dart';
 import 'package:book_app/features/myLibrary/ui/screens/my_library.dart';
 import 'package:book_app/features/profile/ui/screens/profile_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -93,7 +94,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 20),
-                Text('Loading books...'),
+                Text('Loading books...'.tr()),
               ],
             ),
           );
@@ -112,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(height: 20.h),
                 ElevatedButton(
                   onPressed: () => cubit.initializeData(),
-                  child: Text('Retry'),
+                  child: Text('Retry'.tr()),
                 ),
               ],
             ),
@@ -127,7 +128,7 @@ class HomeScreen extends StatelessWidget {
 
         }
 
-        return const Center(child: Text('No data available'));
+        return Center(child: Text('No data available'.tr()));
       },
     );
   }
@@ -147,7 +148,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: state.books.isEmpty
-          ? Center(child: Text('No books found in this genre'))
+          ? Center(child: Text('No books found in this genre'.tr()))
           : Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
         child: GridView.builder(
@@ -183,12 +184,12 @@ class HomeScreen extends StatelessWidget {
               // _buildMockDataToggle(context, cubit),
 
               Text(
-                "Welcome back, Reader!",
+                "Welcome back, Reader!".tr(),
                 style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10.h),
               Text(
-                "Discover your next favorite book",
+                "Discover your next favorite book".tr(),
                 style: TextStyle(fontSize: 18.sp, color: AppColor.textGray),
               ),
               SizedBox(height: 20.h),
@@ -196,20 +197,20 @@ class HomeScreen extends StatelessWidget {
               // New Releases Section
               Row(
                 children: [
-                  CustomHomeTitle(text: "New Releases"),
+                  CustomHomeTitle(text: "New Releases".tr()),
                   const Spacer(),
                   TextButton(onPressed: () {
                     Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
-                      'title': "New Releases",
+                      'title': "New Releases".tr(),
                       'items': state.newReleases,
-                      'filterText': 'Filter by Genre:',
+                      'filterText': 'Filter by Genre:'.tr(),
                       //'numberOfItems': state.newReleases?.length ?? 0,
                     });
-                  }, child: Text("See All")),
+                  }, child: Text("See All".tr())),
                 ],
               ),
               SizedBox(height: 5.h),
-              CustomHomeSubtitle(text: "Newly released books spanning various genres."),
+              CustomHomeSubtitle(text: "Newly released books spanning various genres.".tr()),
               SizedBox(height: 20.h),
               BookListCard(
                 books: state.newReleases ?? [],
@@ -220,20 +221,20 @@ class HomeScreen extends StatelessWidget {
               // Trending Now Section
               Row(
                 children: [
-                  CustomHomeTitle(text: "Trending Now"),
+                  CustomHomeTitle(text: "Trending Now".tr()),
                   Spacer(),
                   TextButton(onPressed: () {
                     Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
-                      'title': "Trending Books",
+                      'title': "Trending Books".tr(),
                       'items': state.trendingBooks,
-                      'filterText': 'Filter by Genre:',
+                      'filterText': 'Filter by Genre:'.tr(),
                       //'numberOfItems': state.trendingBooks?.length ?? 0,
                     });
-                  }, child: Text("See All")),
+                  }, child: Text("See All".tr())),
                 ],
               ),
               SizedBox(height: 5.h),
-              CustomHomeSubtitle(text: "Books everyone is talking about."),
+              CustomHomeSubtitle(text: "Books everyone is talking about.".tr()),
               SizedBox(height: 20.h),
               BookListCard(
                 books: state.trendingBooks ?? [],
@@ -242,20 +243,20 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: 30.h),
             Row(
                 children: [
-                  CustomHomeTitle(text: "Recommended"),
+                  CustomHomeTitle(text: "Recommended".tr()),
                   Spacer(),
                   TextButton(onPressed: () {
                     Navigator.pushNamed(context, Routes.seeAllScreen, arguments: {
-                      'title': "Recommended Books",
+                      'title': "Recommended Books".tr(),
                       'items': state.noteworthyBooks,
-                      'filterText': 'Filter by Genre:',
+                      'filterText': 'Filter by Genre:'.tr(),
                       //'numberOfItems': state.noteworthyBooks?.length ?? 0,
                     });
-                  }, child: Text("See All")),
+                  }, child: Text("See All".tr())),
                 ],
               ),
               SizedBox(height: 5.h),
-              CustomHomeSubtitle(text: "Editor’s picks and fresh releases worth your time."),
+              CustomHomeSubtitle(text: "Editor’s picks and fresh releases worth your time.".tr()),
               SizedBox(height: 20.h),
               BookListCard(
                 books: state.noteworthyBooks ?? [],
@@ -295,7 +296,7 @@ class HomeScreen extends StatelessWidget {
     return AppBar(
       centerTitle: true,
       title: Text(
-        'Read Ease',
+        'Read Ease'.tr(),
         style: TextStyle(
           fontSize: 18.sp,
           fontWeight: FontWeight.bold,
@@ -372,26 +373,26 @@ class HomeScreen extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppColor.primaryColor,
       unselectedItemColor: Colors.grey,
-      items: const [
+      items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home',
+          label: 'Home'.tr(),
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.explore),
-          label: 'Search',
+          label: 'Search'.tr(),
         ),
         BottomNavigationBarItem(
           icon: Icon(CupertinoIcons.book_solid),
-          label: 'My Books',
+          label: 'My Books'.tr(),
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.dashboard_outlined),
-          label: 'Dashboard',
+          label: 'Dashboard'.tr(),
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
-          label: 'Profile',
+          label: 'Profile'.tr(),
         ),
       ],
     );
