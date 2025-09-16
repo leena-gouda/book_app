@@ -36,7 +36,7 @@ import 'core/routing/routes.dart';
 import 'features/home/ui/cubit/navigation_cubit.dart';
 import 'features/profile/ui/cubit/theme_cubit.dart';
 
-bool isLogin = false;
+bool isLogin = true;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
@@ -122,6 +122,7 @@ class MyApp extends StatelessWidget {
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
+          home: HomeScreen(),
           builder: (context, child) {
             return Directionality(
               textDirection: context.locale.languageCode == 'ar'
@@ -136,6 +137,7 @@ class MyApp extends StatelessWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeMode,
+          //initialRoute: Routes.signupsScreen,
           initialRoute: isLogin ? Routes.homeScreen : Routes.onboardingScreen,
           onGenerateRoute: appRouter.generateRoute,
         );

@@ -38,36 +38,46 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId =  Supabase.instance.client.auth.currentUser?.id;
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+
+    print('🔄 Building HomeScreen with locale: ${context.locale}');
+    print('🔄 Current tab index: ${context.watch<NavigationCubit>().state}');
 
     return BlocBuilder<NavigationCubit, int>(
       builder: (context, currentTab) {
+        print('📱 Building Scaffold with tab: $currentTab');
         return Scaffold(
+          resizeToAvoidBottomInset: false,
+          key: ValueKey(context.locale.toString()),
           appBar: currentTab == 0 ? _buildHomeAppBar(context) : null,
-          body: IndexedStack(
-            index: currentTab,
-            children: [
-              _buildHomeContent(), // Home tab
-              BlocBuilder<HomeCubit, HomeState>(
-                builder: (context, state) {
-                  if (state is HomeSuccess) {
-                    return SearchScreen(
-                      allBooks: [
-                        ...state.newReleases ?? [],
-                        ...state.trendingBooks ?? [],
-                        ...state.noteworthyBooks ?? [],
-                      ],
-                    );
-                  }
-                  return const Center(child: CircularProgressIndicator());
-                },
-              ),
-              MyLibrary(),
-              DashboardScreen(userId: userId!),
-              ProfileScreen(),
-            ],
+          body: SafeArea(
+            child: IndexedStack(
+              index: currentTab,
+              children: [
+                _buildHomeContent(),
+                BlocBuilder<HomeCubit, HomeState>(
+                  buildWhen: (previous, current) => previous != current,
+                  builder: (context, state) {
+                    if (state is HomeSuccess) {
+                      return SearchScreen(
+                        allBooks: [
+                          ...state.newReleases ?? [],
+                          ...state.trendingBooks ?? [],
+                          ...state.noteworthyBooks ?? [],
+                        ],
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                ),
+                MyLibrary(),
+                userId != null
+                    ? DashboardScreen(userId: userId)
+                    : const Center(child: Text('Please login to view dashboard')),
+                ProfileScreen(),
+              ],
+            ),
           ),
-
           bottomNavigationBar: _buildBottomNavigationBar(context, currentTab),
         );
       },
@@ -134,42 +144,60 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildGenreBooksView(BuildContext context, HomeSuccess state, HomeCubit cubit) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            cubit.showAllBooks(); // This should reset showGenreView to false
-          },
-        ),
-        title: Text(
-          cubit.genres[cubit.currentGenreIndex].capitalize(),
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: state.books.isEmpty
-          ? Center(child: Text('No books found in this genre'.tr()))
-          : Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 15.w,
-            mainAxisSpacing: 15.h,
-            childAspectRatio: 0.7,
+    return Column(
+      children: [
+        // Custom AppBar
+        Container(
+          color: Theme.of(context).appBarTheme.backgroundColor ?? Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  cubit.showAllBooks();
+                },
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Text(
+                  cubit.genres[cubit.currentGenreIndex].capitalize(),
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          itemCount: state.books.length,
-          itemBuilder: (context, index) {
-            final book = state.books[index];
-            return BookkCard(
-              book: book,
-            );
-          },
         ),
-      ),
+
+        // Content with Expanded to take remaining space
+        Expanded(
+          child: state.books.isEmpty
+              ? Center(child: Text('No books found in this genre'.tr()))
+              : Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 15.w,
+                mainAxisSpacing: 15.h,
+                childAspectRatio: 0.7,
+              ),
+              itemCount: state.books.length,
+              itemBuilder: (context, index) {
+                final book = state.books[index];
+                return BookkCard(book: book);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
-
+  
 // Your existing home view (renamed from the original content)
   Widget _buildNormalHomeView(BuildContext context, HomeSuccess state, HomeCubit cubit) {
     return RefreshIndicator(

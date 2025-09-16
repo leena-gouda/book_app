@@ -10,6 +10,8 @@ abstract class ProfileState {
 }
 
 class ProfileInitial extends ProfileState {}
+class ProfileNoData extends ProfileState {} // Add this
+
 
 class ProfileLoading extends ProfileState {}
 

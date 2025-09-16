@@ -155,18 +155,33 @@ class ProfileScreen extends StatelessWidget {
 
     );
   }
+  // void _changeLanguage(BuildContext context) async {
+  //   final currentLocale = context.locale;
+  //   final newLocale = currentLocale.languageCode == 'en' ? Locale('ar') : Locale('en');
+  //
+  //   await context.setLocale(newLocale);
+  //
+  //   // Force a complete rebuild by navigating to a new instance
+  //   Navigator.pushReplacement(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => ProfileScreen(key: UniqueKey()),
+  //     ),
+  //   );
+  // }
+
   void _changeLanguage(BuildContext context) async {
     final currentLocale = context.locale;
     final newLocale = currentLocale.languageCode == 'en' ? Locale('ar') : Locale('en');
 
     await context.setLocale(newLocale);
 
-    // Force a complete rebuild by navigating to a new instance
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfileScreen(key: UniqueKey()),
-      ),
+    // Instead of navigating to ProfileScreen, pop the dialog and let the UI rebuild
+    Navigator.pop(context); // Close the language dialog
+
+    // Optional: Show a message that language changed
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Language changed to ${newLocale.languageCode}'.tr())),
     );
   }
 

@@ -5,6 +5,8 @@ class NavigationCubit extends Cubit<int> {
 
   void changeTab(int newIndex) {
     if (newIndex != state) {
+      print('🧭 Changing tab from $state to $newIndex');
+
       emit(newIndex);
     }
   }
