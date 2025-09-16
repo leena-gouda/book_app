@@ -136,7 +136,7 @@ class MyApp extends StatelessWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeMode,
-          initialRoute: isLogin ? Routes.homeScreen : Routes.splashScreen,
+          initialRoute: isLogin ? Routes.homeScreen : Routes.onboardingScreen,
           onGenerateRoute: appRouter.generateRoute,
         );
   },
